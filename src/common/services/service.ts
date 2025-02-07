@@ -6,7 +6,6 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 export interface ServiceOptions {
     model: any;
-    delete?: "soft" | "hard";
 }
 
 export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
@@ -54,23 +53,7 @@ export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
         }
 
         async delete(id: any, manager?: EntityManager): Promise<any> {
-            const primaryKey: ColumnMetadata[] =
-                this.model.getRepository().metadata.primaryColumns[0]
-                    .propertyName;
-
-            let query = manager
-                .withRepository(this.model.getRepository())
-                .createQueryBuilder();
-
-            options.delete === "hard"
-                ? (query = query.delete())
-                : (query = query.softDelete());
-
-            query = query.where(`${primaryKey} = :id`, {
-                id,
-            });
-
-            return query.execute();
+            return this.getOne(id, {}).then((e) => e.delete(manager));
         }
     }
 
