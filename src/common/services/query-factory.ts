@@ -1,10 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import {
-    BaseEntity,
-    EntityManager,
-    Repository,
-    SelectQueryBuilder,
-} from "typeorm";
+import { BaseEntity, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
@@ -128,16 +123,10 @@ export class QueryFactory {
         };
     }
 
-    public async createQuery(model, data, manager: EntityManager) {
+    public async createQuery(model, data) {
         const repository: Repository<any> = model.getRepository();
 
-        const element = await this.createObjectAndRelations(
-            model,
-            data,
-            repository,
-        );
-
-        return manager.withRepository(repository).save(element);
+        return this.createObjectAndRelations(model, data, repository);
     }
 
     public async createObjectAndRelations(
@@ -150,6 +139,7 @@ export class QueryFactory {
 
         const element = repository.create(data);
 
+        const promises = [];
         for (const relation of relations) {
             if (relation.propertyName in data) {
                 const relationType = relation.relationType;
@@ -157,10 +147,17 @@ export class QueryFactory {
                     relationType === "one-to-one" ||
                     relationType === "many-to-one"
                 )
-                    await this.createSingleRelation(element, relation, data);
-                else await this.createMultipleRelation(element, relation, data);
+                    promises.push(
+                        this.createSingleRelation(element, relation, data),
+                    );
+                else
+                    promises.push(
+                        this.createMultipleRelation(element, relation, data),
+                    );
             }
         }
+
+        await Promise.all(promises);
 
         return element;
     }

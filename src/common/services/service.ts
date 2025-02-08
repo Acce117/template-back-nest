@@ -33,8 +33,15 @@ export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
             return query.getOne();
         }
 
-        create(data, manager?: EntityManager): Promise<any> {
-            return this.queryFactory.createQuery(this.model, data, manager);
+        async create(data, manager?: EntityManager): Promise<any> {
+            const element = await this.queryFactory.createQuery(
+                this.model,
+                data,
+            );
+
+            return manager
+                .withRepository(this.model.getRepository())
+                .save(element);
         }
 
         update(id: any, data: any, manager?: EntityManager) {
