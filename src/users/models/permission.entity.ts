@@ -1,13 +1,8 @@
-import {
-    BaseEntity,
-    Column,
-    DeleteDateColumn,
-    Entity,
-    PrimaryColumn,
-} from "typeorm";
+import { BaseModel } from "src/common/model/baseModel";
+import { Column, DeleteDateColumn, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
-export class Permission extends BaseEntity {
+export class Permission extends BaseModel {
     @PrimaryColumn({ generated: true })
     id_permission: number;
 

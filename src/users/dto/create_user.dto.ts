@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from "class-validator";
+import { IsArray, IsEmail, IsOptional, IsString } from "class-validator";
 
 export class CreateUserDto {
     @IsString()
@@ -9,4 +9,9 @@ export class CreateUserDto {
 
     @IsString()
     password: string;
+
+    //TODO handle role schema validation
+    @IsArray()
+    @IsOptional()
+    roles: Array<any>;
 }

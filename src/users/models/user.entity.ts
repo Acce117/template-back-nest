@@ -31,7 +31,7 @@ export class User extends BaseModel {
     // @Exclude()
     deleted_at: Date;
 
-    @ManyToMany(() => Role)
+    @ManyToMany(() => Role, { cascade: true })
     @JoinTable({
         name: "users_roles",
         joinColumn: { name: "id_user", referencedColumnName: "id_user" },
