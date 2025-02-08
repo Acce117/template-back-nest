@@ -11,7 +11,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 @Injectable()
 export class QueryFactory {
     public selectQuery(model, params): SelectQueryBuilder<BaseEntity> {
-        let query = model.createQueryBuilder(
+        let query: SelectQueryBuilder<any> = model.createQueryBuilder(
             model.getRepository().metadata.tableName,
         );
 
@@ -19,6 +19,8 @@ export class QueryFactory {
         if (params.relations)
             query = this.setRelations(model, params.relations, query);
         if (params.where) query = this.collectionQuery(model, params, query);
+        if (params.limit) query = query.limit(params.limit);
+        if (params.offset) query = query.offset(params.offset);
 
         return query;
     }
