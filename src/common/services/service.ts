@@ -18,17 +18,19 @@ export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
             return this.queryFactory.selectQuery(this.model, params).getMany();
         }
 
-        getOne(id, params): Promise<any> {
+        getOne(params, id?): Promise<any> {
             let query = this.queryFactory.selectQuery(this.model, params);
 
-            const primaryKey: ColumnMetadata[] =
-                this.model.getRepository().metadata.primaryColumns[0]
-                    .propertyName;
+            if (id) {
+                const primaryKey: ColumnMetadata[] =
+                    this.model.getRepository().metadata.primaryColumns[0]
+                        .propertyName;
 
-            query = query.andWhere(
-                `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
-                { id },
-            );
+                query = query.andWhere(
+                    `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
+                    { id },
+                );
+            }
 
             return query.getOne();
         }

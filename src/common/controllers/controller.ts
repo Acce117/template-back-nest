@@ -73,10 +73,13 @@ export function CrudBaseController(
             @Query(new QueryBuilderPipe()) params,
             @Body() body,
         ) {
-            const result = await this.service.getOne(id, {
-                ...params,
-                ...body,
-            });
+            const result = await this.service.getOne(
+                {
+                    ...params,
+                    ...body,
+                },
+                id,
+            );
             return instanceToPlain(result);
         }
 

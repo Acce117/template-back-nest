@@ -8,6 +8,8 @@ import { StreamerModule } from "./fileStreamer/streamer.module";
 import { UsersModule } from "./users/users.module";
 import { RouterModule } from "@nestjs/core";
 import { routes } from "./routes/routes";
+import { MailerModule } from "@nestjs-modules/mailer";
+import mailerConfig from "./config/mailer.config";
 
 @Module({
     imports: [
@@ -23,6 +25,11 @@ import { routes } from "./routes/routes";
 
         //config modules
         ConfigModule.forRoot(),
+        MailerModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: mailerConfig,
+            inject: [ConfigService],
+        }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: databaseConfig,

@@ -20,7 +20,7 @@ export class User extends BaseModel {
     @Column()
     username: string;
 
-    @Column()
+    @Column({ unique: true })
     email: string;
 
     @Column()
@@ -28,7 +28,7 @@ export class User extends BaseModel {
     password: string;
 
     @DeleteDateColumn()
-    // @Exclude()
+    @Exclude()
     deleted_at: Date;
 
     @ManyToMany(() => Role, { cascade: true })
