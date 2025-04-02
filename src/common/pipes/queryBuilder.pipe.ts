@@ -14,6 +14,9 @@ export class QueryBuilderPipe implements PipeTransform {
 
         if (value.depth)
             return { ...transformedValue, depth: parseInt(value.depth) };
+
+        if (value.limit) transformedValue.limit = parseInt(value.limit);
+        if (value.offset) transformedValue.offset = parseInt(value.offset);
         return transformedValue;
     }
 
