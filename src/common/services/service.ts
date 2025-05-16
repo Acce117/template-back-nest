@@ -14,8 +14,25 @@ export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
         model = options.model;
         @Inject(QueryFactory) readonly queryFactory: QueryFactory;
 
-        getAll(params): Promise<any> {
-            return this.queryFactory.selectQuery(this.model, params).getMany();
+        async getAll(params): Promise<any> {
+            const data = await this.queryFactory
+                .selectQuery(this.model, params)
+                .getMany();
+
+            const count = await this.queryFactory
+                .selectQuery(this.model, params)
+                .getCount();
+
+            const pages = Math.ceil(count / params.limit);
+
+            return {
+                pages,
+                actual_page: Math.ceil(
+                    params.offset || count / params.limit || 10,
+                ),
+                count,
+                data,
+            };
         }
 
         getOne(params, id?): Promise<any> {
