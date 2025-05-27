@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { BaseEntity, Repository, SelectQueryBuilder } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 @Injectable()
 export class QueryFactory {
     public selectQuery<T>(model, params): SelectQueryBuilder<T> {
-        let query: SelectQueryBuilder<any> = model.createQueryBuilder(
+        let query: SelectQueryBuilder<T> = model.createQueryBuilder(
             model.getRepository().metadata.tableName,
         );
 
@@ -15,17 +15,27 @@ export class QueryFactory {
             query = this.setRelations(model, params.relations, query);
         if (params.where)
             query = this.collectionQuery(model, params.where, query);
+        if (params.ordered_by) query = this.orderedBy(params.ordered_by, query);
         if (params.limit) query = query.limit(params.limit);
         if (params.offset) query = query.offset(params.offset);
 
         return query;
     }
 
-    public collectionQuery(
-        model,
-        where,
-        query?,
-    ): SelectQueryBuilder<BaseEntity> {
+    private orderedBy(ordered_by, query: SelectQueryBuilder<any>) {
+        const fields: Array<string> = [];
+        let sortMethod: "ASC" | "DESC" = "ASC";
+        if (Array.isArray(ordered_by)) fields.push(...ordered_by);
+        else {
+            fields.push(...ordered_by.fields);
+            sortMethod = ordered_by.sort_method || "ASC";
+        }
+
+        query.orderBy(`${fields}`, sortMethod);
+        return query;
+    }
+
+    public collectionQuery(model, where, query?): SelectQueryBuilder<any> {
         const table = model.getRepository().metadata.tableName;
         const primaryKey: ColumnMetadata[] =
             model.getRepository().metadata.primaryColumns[0].propertyName;
@@ -50,8 +60,8 @@ export class QueryFactory {
     private setRelations(
         model,
         relations,
-        query: SelectQueryBuilder<BaseEntity>,
-    ): SelectQueryBuilder<BaseEntity> {
+        query: SelectQueryBuilder<any>,
+    ): SelectQueryBuilder<any> {
         relations.forEach((relation) => {
             let alias =
                 typeof model === "string"
