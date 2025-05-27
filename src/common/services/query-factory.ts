@@ -5,7 +5,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 @Injectable()
 export class QueryFactory {
-    public selectQuery(model, params): SelectQueryBuilder<BaseEntity> {
+    public selectQuery<T>(model, params): SelectQueryBuilder<T> {
         let query: SelectQueryBuilder<any> = model.createQueryBuilder(
             model.getRepository().metadata.tableName,
         );

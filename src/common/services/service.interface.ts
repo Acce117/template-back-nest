@@ -1,12 +1,13 @@
-export interface ICrudService {
+export interface ICrudService<T> {
     model: any;
-    getAll(params);
-    getOne(params, id?);
-    create(data, manager?);
+    getAll(params): Promise<T[]>;
+    getOne(params, id?): Promise<T>;
+    create(data, manager?): Promise<T>;
     update(id, data, manager?);
     delete(id, manager?);
+    dataAmount(params);
 }
 
-export interface ICrudTreeService extends ICrudService {
+export interface ICrudTreeService<T> extends ICrudService<T> {
     getAncestors(params, id?);
 }

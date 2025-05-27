@@ -41,14 +41,6 @@ export class SiteService {
         };
     }
 
-    public me(jwt) {
-        const id_user = this.jwtService.decode(jwt).id_user;
-        return this.userService.getOne(
-            { relations: ["roles", "permissions"] },
-            id_user,
-        );
-    }
-
     public async forgotPassword(email: string) {
         const user: User = await this.userService.getOne({
             where: { email },

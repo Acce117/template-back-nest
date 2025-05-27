@@ -8,35 +8,22 @@ export interface ServiceOptions {
     model: any;
 }
 
-export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
+export function CrudBaseService<T>(
+    options: ServiceOptions,
+): Type<ICrudService<T>> {
     @Injectable()
-    class CrudService implements ICrudService {
+    class CrudService implements ICrudService<T> {
         model = options.model;
         @Inject(QueryFactory) readonly queryFactory: QueryFactory;
 
-        async getAll(params): Promise<any> {
-            const data = await this.queryFactory
-                .selectQuery(this.model, params)
+        async getAll(params): Promise<T[]> {
+            return this.queryFactory
+                .selectQuery<T>(this.model, params)
                 .getMany();
-
-            const count = await this.queryFactory
-                .selectQuery(this.model, params)
-                .getCount();
-
-            const pages = Math.ceil(count / params.limit);
-
-            return {
-                pages,
-                actual_page: Math.ceil(
-                    params.offset || count / params.limit || 10,
-                ),
-                count,
-                data,
-            };
         }
 
-        getOne(params, id?): Promise<any> {
-            let query = this.queryFactory.selectQuery(this.model, params);
+        getOne(params, id?): Promise<T> {
+            let query = this.queryFactory.selectQuery<T>(this.model, params);
 
             if (id) {
                 const primaryKey: ColumnMetadata[] =
@@ -52,7 +39,7 @@ export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
             return query.getOne();
         }
 
-        async create(data, manager?: EntityManager): Promise<any> {
+        async create(data, manager?: EntityManager): Promise<T> {
             const element = await this.queryFactory.createQuery(
                 this.model,
                 data,
@@ -79,7 +66,13 @@ export function CrudBaseService(options: ServiceOptions): Type<ICrudService> {
         }
 
         async delete(id: any, manager?: EntityManager): Promise<any> {
-            return this.getOne(id, {}).then((e) => e.delete(manager));
+            return this.getOne(id, {}).then((e: any) => e.delete(manager));
+        }
+
+        async dataAmount(params) {
+            return await this.queryFactory
+                .selectQuery(this.model, params)
+                .getCount();
         }
     }
 

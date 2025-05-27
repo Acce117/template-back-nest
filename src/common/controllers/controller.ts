@@ -52,7 +52,7 @@ export function CrudBaseController(
     @applyDecorators(...(options.decorators ?? []))
     @Controller(options.prefix)
     class CrudController implements ICrudController {
-        @Inject(options.service) service: ICrudService;
+        @Inject(options.service) service: ICrudService<any>;
         @InjectDataSource() dataSource: DataSource;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
@@ -64,7 +64,19 @@ export function CrudBaseController(
                 ...params,
                 ...body,
             });
-            return result;
+
+            const count = await this.service.dataAmount(params);
+
+            const pages = Math.ceil(count / params.limit);
+
+            return {
+                pages,
+                actual_page: Math.ceil(
+                    params.offset || count / params.limit || 10,
+                ),
+                count,
+                result,
+            };
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))

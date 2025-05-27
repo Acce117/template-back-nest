@@ -1,8 +1,7 @@
-import { Body, Controller, Get, Inject, Post } from "@nestjs/common";
+import { Body, Controller, Inject, Post } from "@nestjs/common";
 import { SiteService } from "../services/site.service";
 import { UserCredentials } from "../dto/userCredentials.dto";
 import { JWT } from "src/common/decorators/jwt.decorator";
-import { instanceToPlain } from "class-transformer";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { handleTransaction } from "src/common/utils/handleTransaction";
@@ -26,12 +25,6 @@ export class SiteController {
         return handleTransaction(this.dataSource, (manager) =>
             this.siteService.signIn(user, manager),
         );
-    }
-
-    @Get("/me")
-    async me(@JWT() jwt) {
-        const user = await this.siteService.me(jwt);
-        return instanceToPlain(user);
     }
 
     @Post("/forgot-password")

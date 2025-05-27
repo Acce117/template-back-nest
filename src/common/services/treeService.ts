@@ -5,11 +5,11 @@ import { Injectable, Type } from "@nestjs/common";
 import { CrudBaseService, ServiceOptions } from "./service";
 import { ICrudTreeService } from "./service.interface";
 
-export function TreeBaseService<T extends { children }>(
+export function TreeBaseService<T>(
     options: ServiceOptions,
-): Type<ICrudTreeService> {
+): Type<ICrudTreeService<T>> {
     @Injectable()
-    class TreeService extends CrudBaseService(options) {
+    class TreeService extends CrudBaseService<T>(options) {
         constructor(
             @InjectRepository(options.model)
             readonly treeRepository: TreeRepository<T>,
@@ -77,10 +77,10 @@ export function TreeBaseService<T extends { children }>(
         //TODO generalized, this is too specific
         async update(id: number, data: any) {
             if (data.father_group !== undefined) {
-                const group = await super.getOne({}, id);
+                const group: any = await super.getOne({}, id);
                 const old_father = group.father_group;
 
-                const new_father = data.father_group
+                const new_father: any = data.father_group
                     ? await super.getOne({}, data.father_group)
                     : null;
                 group.parent = new_father;
