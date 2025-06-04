@@ -1,12 +1,12 @@
 import { Body, Controller, Inject, Post } from "@nestjs/common";
 import { SiteService } from "../services/site.service";
-import { UserCredentials } from "../dto/userCredentials.dto";
 import { JWT } from "src/common/decorators/jwt.decorator";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { handleTransaction } from "src/common/utils/handleTransaction";
-import { CreateUserDto } from "src/users/dto/create_user.dto";
+import { UserDto } from "src/users/dto/user.dto";
 import { BlackListService } from "../services/blacklist.service";
+import { ValidateDtoPipe } from "src/common/pipes/validateDto.pipe";
 
 @Controller()
 export class SiteController {
@@ -16,12 +16,14 @@ export class SiteController {
     constructor(private readonly siteService: SiteService) {}
 
     @Post("/login")
-    async login(@Body() credentials: UserCredentials) {
+    async login(
+        @Body(new ValidateDtoPipe(UserDto, "login")) credentials: UserDto,
+    ) {
         return this.siteService.login(credentials);
     }
 
     @Post("/sign_in")
-    signIn(@Body() user: CreateUserDto) {
+    signIn(@Body(new ValidateDtoPipe(UserDto, "create")) user: UserDto) {
         return handleTransaction(this.dataSource, (manager) =>
             this.siteService.signIn(user, manager),
         );
