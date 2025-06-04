@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { plainToInstance } from "class-transformer";
 import { Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
@@ -148,7 +149,9 @@ export class QueryFactory {
         if (!repository) repository = model.getRepository();
         const relations: RelationMetadata[] = repository.metadata.relations;
 
-        const element = repository.create(data);
+        const element = plainToInstance(model, data, {
+            ignoreDecorators: true,
+        });
 
         const promises = [];
         for (const relation of relations) {
