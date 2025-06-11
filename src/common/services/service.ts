@@ -69,9 +69,9 @@ export function CrudBaseService<T>(
             return this.getOne(id, {}).then((e: any) => e.delete(manager));
         }
 
-        async dataAmount(params) {
-            return await this.queryFactory
-                .selectQuery(this.model, params)
+        dataAmount(params) {
+            return this.queryFactory
+                .selectQuery(this.model, { where: params.where })
                 .getCount();
         }
     }

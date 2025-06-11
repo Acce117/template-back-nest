@@ -11,14 +11,12 @@ import {
     Query,
     Type,
 } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
 import { ICrudController } from "./controller.interface";
 import { ICrudService } from "../services/service.interface";
 import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
 import { instanceToPlain } from "class-transformer";
-import { handleTransaction } from "../utils/handleTransaction";
 import { QueryBuilderPipe } from "../pipes/queryBuilder.pipe";
+import { TransactionHandlerType } from "../utils/transactionHandler";
 
 interface EndPointOptions {
     decorators?: Array<MethodDecorator>;
@@ -52,7 +50,8 @@ export function CrudBaseController(
     @Controller(options.prefix)
     class CrudController implements ICrudController {
         @Inject(options.service) service: ICrudService<any>;
-        @InjectDataSource() dataSource: DataSource;
+        @Inject("transaction-handler")
+        transactionHandler: TransactionHandlerType;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
         async getAll(
@@ -96,7 +95,7 @@ export function CrudBaseController(
 
         @applyDecorators(...controllerDecorators(options.create, Post()))
         create(@Body(new ValidateDtoPipe(options.dto, "create")) body) {
-            return handleTransaction(this.dataSource, async (manager) => {
+            return this.transactionHandler.handle(async (manager) => {
                 const result = await this.service.create(body, manager);
                 return instanceToPlain(result);
             });
@@ -107,7 +106,7 @@ export function CrudBaseController(
             @Param("id") id: number,
             @Body(new ValidateDtoPipe(options.dto, "update")) body,
         ) {
-            return handleTransaction(this.dataSource, async (manager) => {
+            return this.transactionHandler.handle(async (manager) => {
                 const result = await this.service.update(id, body, manager);
                 return instanceToPlain(result);
             });
@@ -115,7 +114,7 @@ export function CrudBaseController(
 
         @applyDecorators(...controllerDecorators(options.delete, Delete(":id")))
         public async delete(@Param("id") id: number) {
-            return handleTransaction(this.dataSource, async (manager) => {
+            return this.transactionHandler.handle(async (manager) => {
                 const result = await this.service.delete(id, manager);
                 return instanceToPlain(result);
             });

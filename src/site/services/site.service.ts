@@ -6,10 +6,10 @@ import {
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
-import { UserCredentials } from "../dto/userCredentials.dto";
 import { UserService } from "src/users/services/users.service";
 import { User } from "src/users/models/user.entity";
 import { MailerService } from "@nestjs-modules/mailer";
+import { UserDto } from "src/users/dto/user.dto";
 
 @Injectable()
 export class SiteService {
@@ -25,7 +25,7 @@ export class SiteService {
         };
     }
 
-    public async login(credentials: UserCredentials) {
+    public async login(credentials: UserDto) {
         const user: User = await this.userService.getOne({
             where: {
                 username: credentials.username,
