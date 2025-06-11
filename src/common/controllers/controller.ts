@@ -14,7 +14,6 @@ import {
 import { ICrudController } from "./controller.interface";
 import { ICrudService } from "../services/service.interface";
 import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
-import { instanceToPlain } from "class-transformer";
 import { QueryBuilderPipe } from "../pipes/queryBuilder.pipe";
 import { TransactionHandlerType } from "../utils/transactionHandler";
 
@@ -58,12 +57,10 @@ export function CrudBaseController(
             @Query(new QueryBuilderPipe()) params,
             @Body() body,
         ): Promise<any> {
-            const result = await this.service.getAll({
-                ...params,
-                ...body,
-            });
+            const dataOptions = { ...params, ...body };
+            const result = await this.service.getAll(dataOptions);
 
-            const count = await this.service.dataAmount(params);
+            const count = await this.service.dataAmount(dataOptions.where);
 
             const pages = Math.ceil(count / params.limit);
 
@@ -83,22 +80,17 @@ export function CrudBaseController(
             @Query(new QueryBuilderPipe()) params,
             @Body() body,
         ) {
-            const result = await this.service.getOne(
-                {
-                    ...params,
-                    ...body,
-                },
-                id,
-            );
-            return instanceToPlain(result);
+            return this.service.getOne(id, {
+                ...params,
+                ...body,
+            });
         }
 
         @applyDecorators(...controllerDecorators(options.create, Post()))
         create(@Body(new ValidateDtoPipe(options.dto, "create")) body) {
-            return this.transactionHandler.handle(async (manager) => {
-                const result = await this.service.create(body, manager);
-                return instanceToPlain(result);
-            });
+            return this.transactionHandler.handle((manager) =>
+                this.service.create(body, manager),
+            );
         }
 
         @applyDecorators(...controllerDecorators(options.update, Patch(":id")))
@@ -106,18 +98,16 @@ export function CrudBaseController(
             @Param("id") id: number,
             @Body(new ValidateDtoPipe(options.dto, "update")) body,
         ) {
-            return this.transactionHandler.handle(async (manager) => {
-                const result = await this.service.update(id, body, manager);
-                return instanceToPlain(result);
-            });
+            return this.transactionHandler.handle((manager) =>
+                this.service.update(id, body, manager),
+            );
         }
 
         @applyDecorators(...controllerDecorators(options.delete, Delete(":id")))
         public async delete(@Param("id") id: number) {
-            return this.transactionHandler.handle(async (manager) => {
-                const result = await this.service.delete(id, manager);
-                return instanceToPlain(result);
-            });
+            return this.transactionHandler.handle((manager) =>
+                this.service.delete(id, manager),
+            );
         }
     }
 

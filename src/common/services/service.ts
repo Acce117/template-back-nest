@@ -22,19 +22,17 @@ export function CrudBaseService<T>(
                 .getMany();
         }
 
-        getOne(params, id?): Promise<T> {
+        getOne(id, params): Promise<T> {
             let query = this.queryFactory.selectQuery<T>(this.model, params);
 
-            if (id) {
-                const primaryKey: ColumnMetadata[] =
-                    this.model.getRepository().metadata.primaryColumns[0]
-                        .propertyName;
+            const primaryKey: ColumnMetadata[] =
+                this.model.getRepository().metadata.primaryColumns[0]
+                    .propertyName;
 
-                query = query.andWhere(
-                    `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
-                    { id },
-                );
-            }
+            query = query.where(
+                `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
+                { id },
+            );
 
             return query.getOne();
         }
@@ -69,9 +67,9 @@ export function CrudBaseService<T>(
             return this.getOne(id, {}).then((e: any) => e.delete(manager));
         }
 
-        dataAmount(params) {
+        dataAmount(where) {
             return this.queryFactory
-                .selectQuery(this.model, { where: params.where })
+                .selectQuery(this.model, { where: where })
                 .getCount();
         }
     }
