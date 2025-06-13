@@ -1,6 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { Repository, SelectQueryBuilder } from "typeorm";
+import {
+    Brackets,
+    Repository,
+    SelectQueryBuilder,
+    WhereExpressionBuilder,
+} from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
@@ -37,22 +42,18 @@ export class QueryFactory {
     }
 
     public collectionQuery(model, where, query?): SelectQueryBuilder<any> {
-        const table = model.getRepository().metadata.tableName;
+        const alias = model.getRepository().metadata.tableName;
         const primaryKey: ColumnMetadata[] =
             model.getRepository().metadata.primaryColumns[0].propertyName;
 
-        query = query || model.createQueryBuilder(table);
+        query = query || model.createQueryBuilder(alias);
 
         if (Array.isArray(where))
-            query.where(`${table}.${primaryKey} IN (:...ids)`, {
+            query.where(`${alias}.${primaryKey} IN (:...ids)`, {
                 ids: where,
             });
         else if (typeof where === "object") {
-            const { resultString, resultParams } = this.buildWhere(
-                where,
-                table,
-            );
-            query = query.where(resultString, resultParams);
+            query = this.buildWhere(where, alias, query);
         }
 
         return query;
@@ -77,24 +78,12 @@ export class QueryFactory {
                     alias = rel;
                 });
             } else if (typeof relation === "object") {
-                let resultString,
-                    resultParams = null;
-
-                if (relation.where) {
-                    const where = this.buildWhere(
-                        relation.where,
-                        relation.name,
-                    );
-                    resultString = where.resultString;
-                    resultParams = where.resultParams;
-                }
-
                 query.leftJoinAndSelect(
                     `${alias}.${relation.name}`,
                     relation.name,
-                    resultString,
-                    resultParams,
                 );
+
+                this.buildWhere(relation.where, relation.name, query);
 
                 if (relation.relations)
                     query = this.setRelations(
@@ -108,35 +97,32 @@ export class QueryFactory {
         return query;
     }
 
-    private buildWhere(params, alias, oper = "and") {
-        let resultString = "";
-        let resultParams = {};
-        let recursiveCall = null;
+    private buildWhere(
+        params,
+        alias,
+        query: WhereExpressionBuilder,
+        oper = "and",
+    ) {
+        let statement = null;
+        let parameters = null;
 
         for (const key in params) {
             if (key === "or" || key === "and") {
-                recursiveCall = this.buildWhere(params[key], alias, key);
-                resultString += `(${recursiveCall.resultString})`;
+                statement = new Brackets((qb) => {
+                    return this.buildWhere(params[key], alias, qb, key);
+                });
             } else {
-                //TODO handle another operator than equals
-                //TODO handle NOT operator
-                if (resultString !== "") resultString += ` ${oper} `;
-
-                resultString += `${alias}.${key} = :${key}`;
-
-                resultParams[key] = params[key];
+                statement = `${alias}.${key} = :${key}`;
+                parameters = {
+                    [key]: params[key],
+                };
             }
+
+            if (oper === "and") query.andWhere(statement, parameters);
+            else query.orWhere(statement, parameters);
         }
 
-        resultParams = {
-            ...resultParams,
-            ...recursiveCall?.resultParams,
-        };
-
-        return {
-            resultString,
-            resultParams,
-        };
+        return query;
     }
 
     public async createQuery(model, data) {
