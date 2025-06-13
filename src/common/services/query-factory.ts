@@ -97,7 +97,11 @@ export class QueryFactory {
                 );
 
                 if (relation.relations)
-                    query = this.setRelations(query, relation, relation.name);
+                    query = this.setRelations(
+                        relation.name,
+                        relation.relations,
+                        query,
+                    );
             }
         });
 

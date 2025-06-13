@@ -14,7 +14,6 @@ import {
 import { ICrudController } from "./controller.interface";
 import { ICrudService } from "../services/service.interface";
 import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
-import { QueryBuilderPipe } from "../pipes/queryBuilder.pipe";
 import { TransactionHandlerType } from "../utils/transactionHandler";
 
 interface EndPointOptions {
@@ -53,10 +52,7 @@ export function CrudBaseController(
         transactionHandler: TransactionHandlerType;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
-        async getAll(
-            @Query(new QueryBuilderPipe()) params,
-            @Body() body,
-        ): Promise<any> {
+        async getAll(@Query() params, @Body() body): Promise<any> {
             const dataOptions = { ...params, ...body };
             const result = await this.service.getAll(dataOptions);
 
@@ -75,11 +71,7 @@ export function CrudBaseController(
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
-        async getOne(
-            @Param("id") id: number,
-            @Query(new QueryBuilderPipe()) params,
-            @Body() body,
-        ) {
+        async getOne(@Param("id") id: number, @Query() params, @Body() body) {
             return this.service.getOne(id, {
                 ...params,
                 ...body,
