@@ -78,7 +78,7 @@ export class QueryFactory {
                     relation.name,
                 );
 
-                this.buildWhere(relation.where, relation.name, query);
+                this.buildWhere(relation.where, model, query);
 
                 if (relation.relations)
                     query = this.setRelations(

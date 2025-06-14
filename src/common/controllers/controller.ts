@@ -62,9 +62,7 @@ export function CrudBaseController(
 
             return {
                 pages,
-                actual_page: Math.ceil(
-                    params.offset || count / params.limit || 10,
-                ),
+                actual_page: Math.ceil(params.offset || count / params.limit),
                 count,
                 result,
             };
