@@ -56,7 +56,7 @@ export function CrudBaseController(
             const dataOptions = { ...params, ...body };
             const result = await this.service.getAll(dataOptions);
 
-            const count = await this.service.dataAmount(dataOptions.where);
+            const count = await this.service.dataAmount(dataOptions);
 
             const pages = Math.ceil(count / params.limit);
 

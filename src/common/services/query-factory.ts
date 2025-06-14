@@ -1,11 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import {
-    Brackets,
-    Repository,
-    SelectQueryBuilder,
-    WhereExpressionBuilder,
-} from "typeorm";
+import { Brackets, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
@@ -53,7 +48,7 @@ export class QueryFactory {
                 ids: where,
             });
         else if (typeof where === "object") {
-            query = this.buildWhere(where, alias, query);
+            query = this.buildWhere(where, model, query);
         }
 
         return query;
@@ -99,18 +94,27 @@ export class QueryFactory {
 
     private buildWhere(
         params,
-        alias,
-        query: WhereExpressionBuilder,
+        model,
+        query: SelectQueryBuilder<any>,
         oper = "and",
     ) {
+        const alias = model.getRepository().metadata.tableName;
+
         let statement = null;
         let parameters = null;
 
         for (const key in params) {
             if (key === "or" || key === "and") {
                 statement = new Brackets((qb) => {
-                    return this.buildWhere(params[key], alias, qb, key);
+                    return this.buildWhere(
+                        params[key],
+                        model,
+                        qb as SelectQueryBuilder<any>,
+                        key,
+                    );
                 });
+            } else if (typeof params[key] === "object") {
+                statement = this.subQueryGenerator(model, key, params);
             } else {
                 statement = `${alias}.${key} = :${key}`;
                 parameters = {
@@ -123,6 +127,31 @@ export class QueryFactory {
         }
 
         return query;
+    }
+
+    private subQueryGenerator(model, key, params) {
+        return (qb: SelectQueryBuilder<any>) => {
+            const subModel = model
+                .getRepository()
+                .metadata.relations.find(
+                    (relation) => relation.propertyName === key,
+                ).type;
+
+            const subModelAlias = subModel.getRepository().metadata.tableName;
+
+            const subModelPK =
+                subModel.getRepository().metadata.primaryColumns[0]
+                    .propertyName;
+
+            const query = qb
+                .subQuery()
+                .select(`${subModelAlias}.${subModelPK}`)
+                .from(subModel, subModelAlias);
+
+            const subQuery = this.buildWhere(params[key], subModel, query);
+
+            return `${key}.${subModelPK} IN ` + subQuery.getQuery();
+        };
     }
 
     public async createQuery(model, data) {
