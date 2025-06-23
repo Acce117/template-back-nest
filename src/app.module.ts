@@ -25,6 +25,12 @@ import mailerConfig from "./config/mailer.config";
 
         //config modules
         ConfigModule.forRoot(),
+        CacheModule.register(cacheConfig),
+        ThrottlerModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: throttlerConfig,
+            inject: [ConfigService],
+        }),
         MailerModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: mailerConfig,
