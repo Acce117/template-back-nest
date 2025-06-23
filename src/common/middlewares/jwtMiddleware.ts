@@ -4,6 +4,7 @@ import {
     NestMiddleware,
     UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { NextFunction, Request, Response } from "express";
 import { BlackListService } from "src/site/services/blacklist.service";
@@ -12,6 +13,8 @@ import { BlackListService } from "src/site/services/blacklist.service";
 export class JwtMiddleware implements NestMiddleware {
     @Inject(BlackListService)
     private readonly blackListService: BlackListService;
+
+    @Inject(ConfigService) configService: ConfigService;
 
     constructor(private readonly jwtService: JwtService) {}
 
@@ -23,7 +26,9 @@ export class JwtMiddleware implements NestMiddleware {
 
         try {
             const jwt = authorization.split(" ")[1];
-            this.jwtService.verify(jwt, { secret: process.env.JWT_SECRET });
+            this.jwtService.verify(jwt, {
+                secret: this.configService.get("JWT_SECRET"),
+            });
 
             next();
         } catch (err) {
@@ -32,9 +37,7 @@ export class JwtMiddleware implements NestMiddleware {
     }
 
     private async verifyBlackList(token) {
-        const result = await this.blackListService.getOne({
-            where: { token },
-        });
+        const result = await this.blackListService.isBlacklisted(token);
 
         if (!result) throw new UnauthorizedException("Token not valid");
     }

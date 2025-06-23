@@ -23,7 +23,7 @@ export class TransactionHandler implements TransactionHandlerType {
 
             if (errorCb) errorCb();
 
-            result = e;
+            throw e;
         }
 
         await queryRunner.release();

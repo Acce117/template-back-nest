@@ -1,11 +1,11 @@
-import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from "@nestjs/config";
+import { JwtModuleOptions } from "@nestjs/jwt";
 
-const jwtConfig = (config: ConfigService): JwtModule => ({
+const jwtConfig = (config: ConfigService): JwtModuleOptions => ({
     global: true,
-    secret: config.get('JWT_SECRET'),
+    secret: config.get("JWT_SECRET"),
     signOptions: {
-        expiresIn: '1 day',
+        expiresIn: "1 day",
     },
 });
 

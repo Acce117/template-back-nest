@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import {
+    MiddlewareConsumer,
+    Module,
+    NestModule,
+    RequestMethod,
+} from "@nestjs/common";
 import { SiteModule } from "./site/site.module";
 import { CommonModule } from "./common/common.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -21,16 +26,6 @@ import cacheConfig from "./config/cache.config";
 
 @Module({
     imports: [
-        //project modules
-        SiteModule,
-        UsersModule,
-        CommonModule,
-        StreamerModule.register({
-            location: "local",
-            base_path: "/uploads",
-        }),
-        RouterModule.register(routes),
-
         //config modules
         ConfigModule.forRoot(),
         CacheModule.register(cacheConfig),
@@ -71,13 +66,12 @@ import cacheConfig from "./config/cache.config";
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        /**
         consumer
             .apply(JwtMiddleware)
             .exclude(
-                { path: 'login', method: RequestMethod.POST },
-                { path: 'sign_in', method: RequestMethod.POST },
+                { path: "login", method: RequestMethod.POST },
+                { path: "sign_in", method: RequestMethod.POST },
             )
-         */
+            .forRoutes(/** include routes */);
     }
 }
