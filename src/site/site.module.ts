@@ -9,10 +9,19 @@ import { MailerModule } from "@nestjs-modules/mailer";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { BlackListedToken } from "./models/blacklist.entity";
 import { BlackListService } from "./services/blacklist.service";
+import { APP_GUARD } from "@nestjs/core";
+import { ThrottlerGuard } from "@nestjs/throttler";
 
 @Module({
     controllers: [SiteController],
-    providers: [SiteService, BlackListService],
+    providers: [
+        SiteService,
+        BlackListService,
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+        },
+    ],
     imports: [
         ConfigModule,
         UsersModule,
@@ -24,5 +33,6 @@ import { BlackListService } from "./services/blacklist.service";
             inject: [ConfigService],
         }),
     ],
+    exports: [BlackListService],
 })
 export class SiteModule {}
