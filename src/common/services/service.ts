@@ -1,4 +1,4 @@
-import { Inject, Injectable, Type } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, Type } from "@nestjs/common";
 import { QueryFactory } from "./query-factory";
 import { ICrudService } from "./service.interface";
 import { EntityManager } from "typeorm";
@@ -22,7 +22,7 @@ export function CrudBaseService<T>(
                 .getMany();
         }
 
-        getOne(id, params): Promise<T> {
+        getOne(id, params?): Promise<T> {
             let query = this.queryFactory.selectQuery<T>(this.model, params);
 
             const primaryKey: ColumnMetadata[] =
@@ -48,19 +48,12 @@ export function CrudBaseService<T>(
                 .save(element);
         }
 
-        update(id: any, data: any, manager?: EntityManager) {
-            const primaryKey: ColumnMetadata[] =
-                this.model.getRepository().metadata.primaryColumns[0]
-                    .propertyName;
+        async update(id: any, data: any, manager?: EntityManager) {
+            const entity = await this.getOne(id);
 
-            const query = manager
-                .withRepository(this.model.getRepository())
-                .createQueryBuilder()
-                .update()
-                .set(data)
-                .where(`${primaryKey} = :id`, { id });
+            if (!entity) throw new NotFoundException();
 
-            return query.execute();
+            return manager.update(this.model, id, data);
         }
 
         async delete(id: any, manager?: EntityManager): Promise<any> {
