@@ -35,7 +35,10 @@ export class UserSubscriber implements EntitySubscriberInterface {
     }
 
     beforeUpdate(event: UpdateEvent<any>): Promise<any> | void {
-        if (event.entity.password)
-            event.entity = this.hashPassword(event.entity);
+        const password_edited = event.updatedColumns.find(
+            (c) => c.propertyName === "password",
+        );
+
+        if (password_edited) event.entity = this.hashPassword(event.entity);
     }
 }
