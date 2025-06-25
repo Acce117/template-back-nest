@@ -23,6 +23,7 @@ import { throttlerConfig } from "./config/throttler.config";
 import { JwtModule } from "@nestjs/jwt";
 import { CacheModule } from "@nestjs/cache-manager";
 import cacheConfig from "./config/cache.config";
+import bullmqConfig from "./config/bullMQ.config";
 
 @Module({
     imports: [
@@ -44,12 +45,7 @@ import cacheConfig from "./config/cache.config";
             useFactory: databaseConfig,
             inject: [ConfigService],
         }),
-        BullModule.forRoot({
-            connection: {
-                host: "localhost",
-                port: 6379,
-            },
-        }),
+        BullModule.forRoot(bullmqConfig),
         JwtModule,
 
         //project modules
