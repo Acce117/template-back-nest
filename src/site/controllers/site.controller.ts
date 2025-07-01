@@ -4,6 +4,7 @@ import { JWT } from "src/common/decorators/jwt.decorator";
 import { UserDto } from "src/users/dto/user.dto";
 import { BlackListService } from "../services/blacklist.service";
 import { TransactionHandlerType } from "src/common/utils/transactionHandler";
+import { Public } from "src/common/decorators/isPublic.decorator";
 
 @Controller()
 export class SiteController {
@@ -13,6 +14,7 @@ export class SiteController {
     constructor(private readonly siteService: SiteService) {}
 
     @Post("/login")
+    @Public()
     async login(
         @Body(new ValidationPipe({ groups: ["login"] }))
         credentials: UserDto,
@@ -21,6 +23,7 @@ export class SiteController {
     }
 
     @Post("/sign_in")
+    @Public()
     signIn(@Body(new ValidationPipe({ groups: ["sign-in"] })) user: UserDto) {
         return this.transactionHandler.handle((manager) =>
             this.siteService.signIn(user, manager),
@@ -30,6 +33,13 @@ export class SiteController {
     @Post("/forgot-password")
     forgotPassword(@Body("email") email: string) {
         this.siteService.forgotPassword(email);
+    }
+
+    @Post("/log_out")
+    logOut(@JWT() jwt: string) {
+        this.blackListService.blackListJwt(jwt);
+
+        return true;
     }
 
     @Post("/reset-password")

@@ -1,7 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
-import { hashSync } from "bcrypt";
 import { ConfigService } from "@nestjs/config";
 
 export class BlackListService {
@@ -9,12 +8,12 @@ export class BlackListService {
     constructor(@Inject(CACHE_MANAGER) readonly cacheManager: Cache) {}
 
     async isBlacklisted(jwt): Promise<boolean> {
-        const hash = hashSync(jwt, this.configService.get("HASH_SALT"));
-        return (await this.cacheManager.get<string>(hash)) ? true : false;
+        const result = await this.cacheManager.get<string>(jwt);
+
+        return result ? true : false;
     }
 
     blackListJwt(jwt): Promise<string> {
-        const hash = hashSync(jwt, this.configService.get("HASH_SALT"));
-        return this.cacheManager.set(hash, jwt);
+        return this.cacheManager.set(jwt, "revoked");
     }
 }

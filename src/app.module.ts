@@ -1,9 +1,4 @@
-import {
-    MiddlewareConsumer,
-    Module,
-    NestModule,
-    RequestMethod,
-} from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { SiteModule } from "./site/site.module";
 import { CommonModule } from "./common/common.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -16,7 +11,6 @@ import { routes } from "./routes/routes";
 import { MailerModule } from "@nestjs-modules/mailer";
 import mailerConfig from "./config/mailer.config";
 import { ThrottlerModule } from "@nestjs/throttler";
-import { JwtMiddleware } from "./common/middlewares/jwtMiddleware";
 import { BullModule } from "@nestjs/bullmq";
 import { SendMailModule } from "./mailer/sendMail.module";
 import { throttlerConfig } from "./config/throttler.config";
@@ -64,14 +58,4 @@ import bullmqConfig from "./config/bullMQ.config";
         SendMailModule,
     ],
 })
-export class AppModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer
-            .apply(JwtMiddleware)
-            .exclude(
-                { path: "login", method: RequestMethod.POST },
-                { path: "sign_in", method: RequestMethod.POST },
-            )
-            .forRoutes(/** include routes */);
-    }
-}
+export class AppModule {}

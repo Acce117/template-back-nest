@@ -9,6 +9,7 @@ import { MailerModule } from "@nestjs-modules/mailer";
 import { BlackListService } from "./services/blacklist.service";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard } from "@nestjs/throttler";
+import { AuthGuard } from "./guards/auth.guard";
 
 @Module({
     controllers: [SiteController],
@@ -18,6 +19,10 @@ import { ThrottlerGuard } from "@nestjs/throttler";
         {
             provide: APP_GUARD,
             useClass: ThrottlerGuard,
+        },
+        {
+            provide: APP_GUARD,
+            useClass: AuthGuard,
         },
     ],
     imports: [
