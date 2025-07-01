@@ -28,11 +28,13 @@ export class SiteService {
     }
 
     public async login(credentials: UserDto) {
-        const user: User = await this.userService.getAll({
-            where: {
-                username: credentials.username,
-            },
-        })[0];
+        const user: User = (
+            await this.userService.getAll({
+                where: {
+                    username: credentials.username,
+                },
+            })
+        )[0];
 
         if (!user) throw new UnauthorizedException("wrong credentials");
         if (!bcrypt.compareSync(credentials.password, user.password))
