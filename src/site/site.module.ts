@@ -6,8 +6,6 @@ import { JwtModule } from "@nestjs/jwt";
 import jwtConfig from "src/config/jwt.config";
 import { UsersModule } from "src/users/users.module";
 import { MailerModule } from "@nestjs-modules/mailer";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { BlackListedToken } from "./models/blacklist.entity";
 import { BlackListService } from "./services/blacklist.service";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard } from "@nestjs/throttler";
@@ -26,7 +24,6 @@ import { ThrottlerGuard } from "@nestjs/throttler";
         ConfigModule,
         UsersModule,
         MailerModule,
-        TypeOrmModule.forFeature([BlackListedToken]),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             useFactory: jwtConfig,
