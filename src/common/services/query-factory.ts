@@ -21,9 +21,10 @@ export class QueryFactory {
 
         if (params.ordered_by) query = this.orderedBy(params.ordered_by, query);
 
-        if (params.limit) query = query.limit(params.limit);
-
-        if (params.offset) query = query.offset(params.offset);
+        if (params.limit) {
+            query = query.take(params.limit);
+            if (params.offset) query = query.offset(params.offset);
+        }
 
         return query;
     }
