@@ -22,7 +22,7 @@ export class SiteController {
 
     @Post("/sign_in")
     signIn(@Body(new ValidationPipe({ groups: ["sign-in"] })) user: UserDto) {
-        this.transactionHandler.handle((manager) =>
+        return this.transactionHandler.handle((manager) =>
             this.siteService.signIn(user, manager),
         );
     }
