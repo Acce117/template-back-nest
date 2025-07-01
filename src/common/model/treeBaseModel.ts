@@ -2,10 +2,10 @@ import { Tree, TreeChildren, TreeParent } from "typeorm";
 import { BaseModel } from "./baseModel";
 
 @Tree("materialized-path")
-export class TreeBaseModel<T> extends BaseModel {
+export class TreeBaseModel extends BaseModel {
     @TreeParent()
-    parent: T;
+    parent: this;
 
     @TreeChildren()
-    children: T[];
+    children: this;
 }

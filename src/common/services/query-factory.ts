@@ -12,12 +12,17 @@ export class QueryFactory {
         );
 
         if (params.select) query = query.select(params.select);
+
         if (params.relations)
             query = this.setRelations(model, params.relations, query);
+
         if (params.where)
             query = this.collectionQuery(model, params.where, query);
+
         if (params.ordered_by) query = this.orderedBy(params.ordered_by, query);
+
         if (params.limit) query = query.limit(params.limit);
+
         if (params.offset) query = query.offset(params.offset);
 
         return query;
@@ -26,6 +31,7 @@ export class QueryFactory {
     private orderedBy(ordered_by, query: SelectQueryBuilder<any>) {
         const fields: Array<string> = [];
         let sortMethod: "ASC" | "DESC" = "ASC";
+
         if (Array.isArray(ordered_by)) fields.push(...ordered_by);
         else {
             fields.push(...ordered_by.fields);
@@ -33,6 +39,7 @@ export class QueryFactory {
         }
 
         query.orderBy(`${fields}`, sortMethod);
+
         return query;
     }
 

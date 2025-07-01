@@ -4,8 +4,9 @@ import { FindTreeOptions, TreeRepository } from "typeorm";
 import { Injectable, Type } from "@nestjs/common";
 import { CrudBaseService, ServiceOptions } from "./service";
 import { ICrudTreeService } from "./service.interface";
+import { TreeBaseModel } from "../model/treeBaseModel";
 
-export function TreeBaseService<T>(
+export function TreeBaseService<T extends TreeBaseModel>(
     options: ServiceOptions,
 ): Type<ICrudTreeService<T>> {
     @Injectable()
@@ -20,6 +21,7 @@ export function TreeBaseService<T>(
                     if (x.databaseName === "mpath") {
                         x.isVirtual = false;
                     }
+
                     return x;
                 });
         }
@@ -36,11 +38,11 @@ export function TreeBaseService<T>(
             return options;
         }
 
-        async getAll(params) {
+        async getAll(params): Promise<T[]> {
             return this.treeRepository.findTrees(this.parseParams(params));
         }
 
-        async getOne(params: any, id?: any) {
+        async getOne(params: any, id?: any): Promise<T> {
             const options = this.parseParams(params);
             const element = await super.getOne(
                 {
@@ -56,7 +58,7 @@ export function TreeBaseService<T>(
             return result;
         }
 
-        async getAncestors(params: object, id?: any) {
+        async getAncestors(params: object, id?: any): Promise<T[]> {
             const element = await super.getOne(params, id);
             return await this.treeRepository.findAncestors(
                 element,
@@ -64,10 +66,10 @@ export function TreeBaseService<T>(
             );
         }
 
-        async create(data: any) {
-            const father = await this.getOne({}, data.father_group);
+        async create(data: any): Promise<T> {
+            const father: T = await this.getOne({}, data.father_group);
 
-            const group = this.model.create(data);
+            const group: T = this.model.create(data);
             group.parent = father;
             group.save();
 
@@ -75,7 +77,7 @@ export function TreeBaseService<T>(
         }
 
         //TODO generalized, this is too specific
-        async update(id: number, data: any) {
+        async update(id: number, data: any): Promise<T> {
             if (data.father_group !== undefined) {
                 const group: any = await super.getOne({}, id);
                 const old_father = group.father_group;

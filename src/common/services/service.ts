@@ -3,12 +3,13 @@ import { QueryFactory } from "./query-factory";
 import { ICrudService } from "./service.interface";
 import { EntityManager } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { BaseModel } from "../model/baseModel";
 
 export interface ServiceOptions {
     model: any;
 }
 
-export function CrudBaseService<T>(
+export function CrudBaseService<T extends BaseModel>(
     options: ServiceOptions,
 ): Type<ICrudService<T>> {
     @Injectable()
@@ -56,12 +57,14 @@ export function CrudBaseService<T>(
             return manager.update(this.model, id, data);
         }
 
-        async delete(id: any, manager?: EntityManager): Promise<any> {
-            return this.getOne(id, {}).then((e: any) => e.delete(manager));
+        async delete(id: any, manager?: EntityManager): Promise<T> {
+            return this.getOne(id, {}).then((e: T) => e.delete(manager));
         }
 
         dataAmount(params) {
-            return this.queryFactory.selectQuery(this.model, params).getCount();
+            return this.queryFactory
+                .selectQuery<T>(this.model, params)
+                .getCount();
         }
     }
 
