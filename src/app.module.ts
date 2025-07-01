@@ -45,7 +45,11 @@ import bullmqConfig from "./config/bullMQ.config";
             useFactory: databaseConfig,
             inject: [ConfigService],
         }),
-        BullModule.forRoot(bullmqConfig),
+        BullModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: bullmqConfig,
+            inject: [ConfigService],
+        }),
         JwtModule,
 
         //project modules

@@ -1,10 +1,13 @@
 import { BullRootModuleOptions } from "@nestjs/bullmq";
+import { ConfigService } from "@nestjs/config";
 
-const bullmqConfig: BullRootModuleOptions = {
-    connection: {
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT),
-    },
+const bullmqConfig = (config: ConfigService): BullRootModuleOptions => {
+    return {
+        connection: {
+            host: config.get("REDIS_HOST"),
+            port: config.get<number>("REDIS_PORT"),
+        },
+    };
 };
 
 export default bullmqConfig;
