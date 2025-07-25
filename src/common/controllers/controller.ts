@@ -5,6 +5,7 @@ import {
     Delete,
     Get,
     Inject,
+    InjectionToken,
     Param,
     Patch,
     Post,
@@ -21,7 +22,7 @@ interface EndPointOptions {
 }
 interface BaseControllerOptions extends EndPointOptions {
     prefix: string;
-    service: object;
+    service: InjectionToken;
     dto?: any;
     getAll?: EndPointOptions | false;
     getOne?: EndPointOptions | false;
