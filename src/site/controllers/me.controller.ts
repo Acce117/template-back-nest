@@ -5,7 +5,7 @@ import { DataSource } from "typeorm";
 import { MeService } from "../services/me.service";
 
 @Controller("/me")
-export class MeController implements IController {
+export class MeController {
     @Inject(MeService) service: MeService;
     dataSource?: DataSource;
 

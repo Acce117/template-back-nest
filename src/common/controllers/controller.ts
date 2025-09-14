@@ -23,7 +23,6 @@ interface EndPointOptions {
 }
 interface BaseControllerOptions extends EndPointOptions {
     prefix: string;
-    service: InjectionToken;
     dto?: any;
     entity?: any;
     getAll?: EndPointOptions | false;
@@ -50,7 +49,7 @@ export function CrudBaseController(
     @applyDecorators(...(options.decorators ?? []))
     @Controller(options.prefix)
     class CrudController implements ICrudController {
-        @Inject(options.service) service: ICrudService<any>;
+        service: ICrudService;
         @Inject("transaction-handler")
         transactionHandler: TransactionHandlerType;
 

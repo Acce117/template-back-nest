@@ -1,7 +1,8 @@
 import { DataSource } from "typeorm";
+import { ICrudService } from "../services/service.interface";
 
 export interface IController {
-    service: object;
+    service: ICrudService;
     dataSource?: DataSource;
 }
 export interface ICrudController extends IController {
