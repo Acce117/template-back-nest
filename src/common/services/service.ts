@@ -11,19 +11,19 @@ export interface ServiceOptions {
 
 export function CrudBaseService<T extends BaseModel>(
     options: ServiceOptions,
-): Type<ICrudService<T>> {
+): Type<ICrudService> {
     @Injectable()
     class CrudService implements ICrudService<T> {
         model = options.model;
         @Inject(QueryFactory) readonly queryFactory: QueryFactory;
 
-        async getAll(params): Promise<T[]> {
+        async getAll(params) {
             return this.queryFactory
                 .selectQuery<T>(this.model, params)
                 .getMany();
         }
 
-        getOne(id, params?): Promise<T> {
+        getOne(id, params?) {
             let query = this.queryFactory.selectQuery<T>(this.model, params);
 
             const primaryKey: ColumnMetadata[] =
@@ -38,7 +38,7 @@ export function CrudBaseService<T extends BaseModel>(
             return query.getOne();
         }
 
-        async create(data, manager?: EntityManager): Promise<T> {
+        async create(data, manager?: EntityManager) {
             const element = await this.queryFactory.createQuery(
                 this.model,
                 data,
@@ -57,7 +57,7 @@ export function CrudBaseService<T extends BaseModel>(
             return manager.update(this.model, id, data);
         }
 
-        async delete(id: any, manager?: EntityManager): Promise<T> {
+        async delete(id: any, manager?: EntityManager) {
             return this.getOne(id, {}).then((e: T) => e.delete(manager));
         }
 
