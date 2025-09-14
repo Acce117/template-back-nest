@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { Role } from "./role.entity";
 import { Permission } from "./permission.entity";
-import { BaseModel, softDelete } from "src/common/model/baseModel";
+import { BaseModel, softDelete } from "../../common/model/baseModel";
 
 @softDelete
 @Entity({ name: "users" })

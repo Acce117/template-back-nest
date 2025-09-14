@@ -1,4 +1,4 @@
-import { BaseModel } from "src/common/model/baseModel";
+import { BaseModel } from "../../common/model/baseModel";
 import { Column, DeleteDateColumn, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()

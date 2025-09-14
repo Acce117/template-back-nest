@@ -1,10 +1,10 @@
 import { Body, Controller, Inject, Post, ValidationPipe } from "@nestjs/common";
 import { SiteService } from "../services/site.service";
-import { JWT } from "src/common/decorators/jwt.decorator";
+import { JWT } from "../../common/decorators/jwt.decorator";
 import { UserDto } from "src/users/dto/user.dto";
 import { BlackListService } from "../services/blacklist.service";
-import { TransactionHandlerType } from "src/common/utils/transactionHandler";
-import { Public } from "src/common/decorators/isPublic.decorator";
+import { TransactionHandlerType } from "../../common/utils/transactionHandler";
+import { Public } from "../../common/decorators/isPublic.decorator";
 
 @Controller()
 export class SiteController {

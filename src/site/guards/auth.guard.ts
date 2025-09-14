@@ -8,7 +8,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
-import { IS_PUBLIC_KEY } from "src/common/decorators/isPublic.decorator";
+import { IS_PUBLIC_KEY } from "../../common/decorators/isPublic.decorator";
 import { BlackListService } from "src/site/services/blacklist.service";
 
 @Injectable()

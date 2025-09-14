@@ -1,4 +1,4 @@
-import { CrudBaseController } from "src/common/controllers/controller";
+import { CrudBaseController } from "../../common/controllers/controller";
 import { UserDto } from "../dto/user.dto";
 import { UserService } from "../services/users.service";
 
