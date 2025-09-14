@@ -16,6 +16,7 @@ import { ICrudController } from "./controller.interface";
 import { ICrudService } from "../services/service.interface";
 import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
 import { TransactionHandlerType } from "../utils/transactionHandler";
+import { plainToInstance } from "class-transformer";
 
 interface EndPointOptions {
     decorators?: Array<MethodDecorator>;
@@ -24,6 +25,7 @@ interface BaseControllerOptions extends EndPointOptions {
     prefix: string;
     service: InjectionToken;
     dto?: any;
+    entity?: any;
     getAll?: EndPointOptions | false;
     getOne?: EndPointOptions | false;
     create?: EndPointOptions | false;
@@ -54,33 +56,45 @@ export function CrudBaseController(
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
         async getAll(@Query() params, @Body() body): Promise<any> {
-            const dataOptions = { ...params, ...body };
-            const result = await this.service.getAll(dataOptions);
+            try {
+                const dataOptions = { ...params, ...body };
+                const result = await this.service.getAll(dataOptions);
 
-            const count = await this.service.dataAmount(dataOptions);
+                const count = await this.service.dataAmount(dataOptions);
 
-            const pages = Math.ceil(count / params.limit);
+                const pages = Math.ceil(count / params.limit);
 
-            return {
-                pages,
-                actual_page: Math.ceil(params.offset || count / params.limit),
-                count,
-                result,
-            };
+                return {
+                    pages,
+                    actual_page: Math.ceil(params.offset || count / params.limit),
+                    count,
+                    data: options.entity ? plainToInstance(options.entity, result) : result,
+                };
+            } catch (err) {
+                return err;
+            }
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
         async getOne(@Param("id") id: number, @Query() params, @Body() body) {
-            return this.service.getOne(id, {
-                ...params,
-                ...body,
-            });
+            try {
+                return this.service.getOne(id, {
+                    ...params,
+                    ...body,
+                }).then(result => {
+                    return options.entity ? plainToInstance(options.entity, result) : result
+                });
+            } catch (err) {
+                return err;
+            }
         }
 
         @applyDecorators(...controllerDecorators(options.create, Post()))
         create(@Body(new ValidateDtoPipe(options.dto, "create")) body) {
             return this.transactionHandler.handle((manager) =>
-                this.service.create(body, manager),
+                this.service.create(body, manager).then((result) => {
+                    return options.entity ? plainToInstance(options.entity, result) : result
+                }),
             );
         }
 
@@ -90,14 +104,18 @@ export function CrudBaseController(
             @Body(new ValidateDtoPipe(options.dto, "update")) body,
         ) {
             return this.transactionHandler.handle((manager) =>
-                this.service.update(id, body, manager),
+                this.service.update(id, body, manager).then((result) => {
+                    return options.entity ? plainToInstance(options.entity, result) : result
+                })
             );
         }
 
         @applyDecorators(...controllerDecorators(options.delete, Delete(":id")))
         public async delete(@Param("id") id: number) {
             return this.transactionHandler.handle((manager) =>
-                this.service.delete(id, manager),
+                this.service.delete(id, manager).then((result) => {
+                    return options.entity ? plainToInstance(options.entity, result) : result
+                }),
             );
         }
     }
