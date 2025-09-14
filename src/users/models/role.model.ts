@@ -1,5 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
-import { Permission } from "./permission.entity";
+import { Permission } from "./permission.model";
 import { BaseModel } from "../../common/model/baseModel";
 
 @Entity()

@@ -2,9 +2,9 @@ import { Module } from "@nestjs/common";
 import { UserController } from "./controllers/users.controller";
 import { UserService } from "./services/users.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./models/user.entity";
-import { Role } from "./models/role.entity";
-import { Permission } from "./models/permission.entity";
+import { User } from "./models/user.model";
+import { Role } from "./models/role.model";
+import { Permission } from "./models/permission.model";
 import { UserSubscriber } from "./models/user.subscriber";
 import { ConfigModule } from "@nestjs/config";
 

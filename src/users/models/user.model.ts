@@ -7,8 +7,8 @@ import {
     ManyToMany,
     PrimaryColumn,
 } from "typeorm";
-import { Role } from "./role.entity";
-import { Permission } from "./permission.entity";
+import { Role } from "./role.model";
+import { Permission } from "./permission.model";
 import { BaseModel, softDelete } from "../../common/model/baseModel";
 
 @softDelete
@@ -24,11 +24,9 @@ export class User extends BaseModel {
     email: string;
 
     @Column()
-    @Exclude()
     password: string;
 
     @DeleteDateColumn()
-    @Exclude()
     deleted_at: Date;
 
     @ManyToMany(() => Role, { cascade: true })
