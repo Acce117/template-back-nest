@@ -71,8 +71,7 @@ export class SiteService {
         });
     }
 
-    public async resetPassword(jwt, password, manager) {
-        const id_user = this.jwtService.decode(jwt).id_user;
+    public async resetPassword(id_user, password, manager) {
         return await this.userService.update(id_user, { password }, manager);
     }
 }

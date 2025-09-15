@@ -10,20 +10,23 @@ import { BlackListService } from "./services/blacklist.service";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard } from "@nestjs/throttler";
 import { AuthGuard } from "./guards/auth.guard";
+import { MeController } from "./controllers/me.controller";
+import { MeService } from "./services/me.service";
 
 @Module({
-    controllers: [SiteController],
+    controllers: [SiteController, MeController],
     providers: [
         SiteService,
         BlackListService,
+        MeService,
         {
             provide: APP_GUARD,
             useClass: ThrottlerGuard,
         },
-        {
-            provide: APP_GUARD,
-            useClass: AuthGuard,
-        },
+        // {
+        //     provide: APP_GUARD,
+        //     useClass: AuthGuard,
+        // },
     ],
     imports: [
         ConfigModule,
