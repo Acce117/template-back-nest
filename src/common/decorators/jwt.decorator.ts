@@ -5,7 +5,7 @@ export function getJwt(ctx: ExecutionContext) {
     const request = ctx.switchToHttp().getRequest();
     const token = request.headers.authorization.split(" ")[1];
 
-    verify(token, process.env.JWT_SECRET);
+    // verify(token, process.env.JWT_SECRET);
 
     return token;
 }
@@ -24,9 +24,14 @@ export const JWT = createParamDecorator((data, ctx) => {
     }
 });
 
-export const JWTPayload = createParamDecorator((data, ctx) => {
+export const JWTPayload = createParamDecorator((attributeToExtract: string, ctx) => {
+    let result;
     try {
-        return getJwtPayload(ctx);
+        const payload = getJwtPayload(ctx);
+        if(attributeToExtract) result = payload[attributeToExtract];
+        else result = payload;
+        
+        return result;
     }catch (err) {
         throw new UnauthorizedException(err);
     }

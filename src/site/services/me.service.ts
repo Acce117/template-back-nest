@@ -7,8 +7,8 @@ export class MeService {
 
     public me(id_user) {
         return this.userService.getOne(
-            { relations: ["roles", "permissions"] },
             id_user,
+            { relations: ["roles", "permissions"] },
         );
     }
 }

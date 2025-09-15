@@ -10,7 +10,7 @@ export class MeController {
     dataSource?: DataSource;
 
     @Get()
-    async me(@JWTPayload() payload) {
-        return await this.service.me(payload.id_user);
+    async me(@JWTPayload('id_user') id_user) {
+        return await this.service.me(id_user);
     }
 }
