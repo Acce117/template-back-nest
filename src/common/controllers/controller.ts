@@ -5,14 +5,11 @@ import {
     Delete,
     Get,
     Inject,
-    InjectionToken,
     Param,
     Patch,
     Post,
     Query,
-    Type,
 } from "@nestjs/common";
-import { ICrudController } from "./controller.interface";
 import { ICrudService } from "../services/service.interface";
 import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
 import { TransactionHandlerType } from "../utils/transactionHandler";
@@ -45,10 +42,10 @@ function controllerDecorators(endpointOptions, httpMethodDecorator) {
 
 export function CrudBaseController(
     options: BaseControllerOptions,
-): Type<ICrudController> {
+) {
     @applyDecorators(...(options.decorators ?? []))
     @Controller(options.prefix)
-    class CrudController implements ICrudController {
+    class CrudController {
         service: ICrudService;
         @Inject("transaction-handler")
         transactionHandler: TransactionHandlerType;
@@ -75,9 +72,9 @@ export function CrudBaseController(
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
-        async getOne(@Param("id") id: number, @Query() params, @Body() body) {
+        async getById(@Param("id") id: number, @Query() params, @Body() body) {
             try {
-                return this.service.getOne(id, {
+                return this.service.getById(id, {
                     ...params,
                     ...body,
                 }).then(result => {
@@ -85,6 +82,15 @@ export function CrudBaseController(
                 });
             } catch (err) {
                 return err;
+            }
+        }
+
+        @Get("exists")
+        exists(@Query() query) {
+            try {
+                return this.service.exists(query);
+            } catch (err) {
+                return err.message;
             }
         }
 

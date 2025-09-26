@@ -1,7 +1,8 @@
 export interface ICrudService<T = any> {
     model: any;
     getAll(params): Promise<T[]>;
-    getOne(id, params?): Promise<T>;
+    getById(id, params?): Promise<T>;
+    exists(whereConditions);
     create(data: T | T[], manager?): Promise<T>;
     update(id, data: Partial<T>, manager?);
     delete(id, manager?);

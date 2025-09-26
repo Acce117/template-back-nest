@@ -23,7 +23,7 @@ export function CrudBaseService<T extends BaseModel>(
                 .getMany();
         }
 
-        getOne(id, params?) {
+        getById(id, params?) {
             let query = this.queryFactory.selectQuery<T>(this.model, params);
 
             const primaryKey: ColumnMetadata[] =
@@ -38,6 +38,11 @@ export function CrudBaseService<T extends BaseModel>(
             return query.getOne();
         }
 
+        async exists(params) {
+            const result = await this.queryFactory.selectQuery(this.model, params);
+            return result !== null;
+        }
+
         async create(data, manager?: EntityManager) {
             const element = await this.queryFactory.createQuery(
                 this.model,
@@ -50,7 +55,7 @@ export function CrudBaseService<T extends BaseModel>(
         }
 
         async update(id: any, data: any, manager?: EntityManager) {
-            const entity = await this.getOne(id);
+            const entity = await this.getById(id);
 
             if (!entity) throw new NotFoundException();
 
@@ -58,7 +63,7 @@ export function CrudBaseService<T extends BaseModel>(
         }
 
         async delete(id: any, manager?: EntityManager) {
-            return this.getOne(id, {}).then((e: T) => e.delete(manager));
+            return this.getById(id, {}).then((e: T) => e.delete(manager));
         }
 
         dataAmount(params) {
