@@ -51,12 +51,11 @@ export function CrudBaseController(
         transactionHandler: TransactionHandlerType;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
-        async getAll(@Query() params, @Body() body): Promise<any> {
+        async getAll(@Query() params): Promise<any> {
             try {
-                const dataOptions = { ...params, ...body };
-                const result = await this.service.getAll(dataOptions);
+                const result = await this.service.getAll(params);
 
-                const count = await this.service.dataAmount(dataOptions);
+                const count = await this.service.dataAmount(params);
 
                 const pages = Math.ceil(count / params.limit);
 
@@ -72,12 +71,9 @@ export function CrudBaseController(
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
-        async getById(@Param("id") id: number, @Query() params, @Body() body) {
+        async getById(@Param("id") id: number, @Query() params) {
             try {
-                return this.service.getById(id, {
-                    ...params,
-                    ...body,
-                }).then(result => {
+                return this.service.getById(id, params).then(result => {
                     return options.entity ? plainToInstance(options.entity, result) : result
                 });
             } catch (err) {
