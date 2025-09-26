@@ -4,94 +4,71 @@ import { FindTreeOptions, TreeRepository } from "typeorm";
 import { Injectable, Type } from "@nestjs/common";
 import { CrudBaseService, ServiceOptions } from "./service";
 import { ICrudTreeService } from "./service.interface";
-import { TreeBaseModel } from "../model/treeBaseModel";
 
-export function TreeBaseService<T extends TreeBaseModel>(
+export function TreeBaseService(
     options: ServiceOptions,
-): Type<ICrudTreeService<T>> {
+): Type<ICrudTreeService> {
     @Injectable()
-    class TreeService extends CrudBaseService<T>(options) {
+    class TreeService extends CrudBaseService<any>(options) {
         constructor(
             @InjectRepository(options.model)
-            readonly treeRepository: TreeRepository<T>,
+            readonly treeRepository: TreeRepository<any>,
         ) {
             super();
             this.treeRepository.metadata.columns =
                 this.treeRepository.metadata.columns.map((x) => {
-                    if (x.databaseName === "mpath") {
-                        x.isVirtual = false;
-                    }
+                    if (x.databaseName === "mpath") x.isVirtual = false;
 
                     return x;
                 });
         }
 
-        private parseParams(params) {
-            const options: FindTreeOptions = {};
-            params.depth !== undefined
-                ? (options.depth = params.depth)
-                : params.depth;
-            params.relations
-                ? (options.relations = params.relations)
-                : params.relations;
-
-            return options;
+        async getAll(params: FindTreeOptions) {
+            return this.treeRepository.findTrees(params);
         }
 
-        async getAll(params): Promise<T[]> {
-            return this.treeRepository.findTrees(this.parseParams(params));
-        }
+        async getById(id: any, params: any) {
+            const element = await super.getById(id, params);
 
-        async getOne(params: any, id?: any): Promise<T> {
-            const options = this.parseParams(params);
-            const element = await super.getById(
-                {
-                    relations: options.relations,
-                },
-                id,
-            );
-            const result: T = await this.treeRepository.findDescendantsTree(
-                element,
-                options,
-            );
+            const result = await this.treeRepository
+                .findDescendantsTree(element, params);
 
             return result;
         }
 
-        async getAncestors(params: object, id?: any): Promise<T[]> {
-            const element = await super.getById(params, id);
+        async getAncestors(id: any, params: FindTreeOptions) {
+            const element = await super.getById(id, params);
+            
             return await this.treeRepository.findAncestors(
                 element,
-                this.parseParams(params),
+                params
             );
         }
 
-        async create(data: any): Promise<T> {
-            const father: T = await this.getOne({}, data.father_group);
+        async create(data: any) {
+            const parent = await this.getById(data.parent_id, {});
 
-            const group: T = this.model.create(data);
-            group.parent = father;
-            group.save();
+            const element = this.model.create(data);
+            element.parent = parent;
+            element.save();
 
-            return group;
+            return element;
         }
 
-        //TODO generalized, this is too specific
-        async update(id: number, data: any): Promise<T> {
-            if (data.father_group !== undefined) {
-                const group: any = await super.getById({}, id);
-                const old_father = group.father_group;
+        async update(id: number, data: any) {
+            if (data.parent_id) {
+                const element = await super.getById(id, {});
+                const old_parent = element.parent;
 
-                const new_father: any = data.father_group
-                    ? await super.getById({}, data.father_group)
-                    : null;
-                group.parent = new_father;
-                group.mpath = this.resolvePath(
-                    group.mpath,
-                    new_father?.mpath,
-                    old_father,
+                const new_parent = data.parent_id ? await super.getById(data.parent_id, {}) : null;
+
+                element.parent = new_parent;
+                element.mpath = this.resolvePath(
+                    element.mpath,
+                    new_parent?.mpath,
+                    old_parent,
                 );
-                group.save();
+                element.save();
             }
 
             const result = super.update(id, data);
@@ -101,12 +78,12 @@ export function TreeBaseService<T extends TreeBaseModel>(
 
         private resolvePath(
             child_path: string,
-            father_path: string,
-            old_father_id: any,
+            parent_path: string,
+            old_parent_id: any,
         ) {
-            let new_path = father_path || "";
-            if (old_father_id) {
-                const paths_array = child_path.split(`${old_father_id}.`);
+            let new_path = parent_path || "";
+            if (old_parent_id) {
+                const paths_array = child_path.split(`${old_parent_id}.`);
 
                 switch (paths_array.length) {
                     case 1:
@@ -114,6 +91,7 @@ export function TreeBaseService<T extends TreeBaseModel>(
                         break;
                     case 2:
                         new_path += paths_array[1];
+                        break;
                 }
             } else {
                 new_path += child_path;

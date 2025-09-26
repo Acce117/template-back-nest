@@ -9,6 +9,6 @@ export interface ICrudService<T = any> {
     dataAmount(params);
 }
 
-export interface ICrudTreeService<T> extends ICrudService<T> {
+export interface ICrudTreeService<T = any> extends ICrudService<T> {
     getAncestors(params, id?);
 }
