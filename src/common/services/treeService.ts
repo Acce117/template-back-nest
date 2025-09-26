@@ -44,7 +44,7 @@ export function TreeBaseService<T extends TreeBaseModel>(
 
         async getOne(params: any, id?: any): Promise<T> {
             const options = this.parseParams(params);
-            const element = await super.getOne(
+            const element = await super.getById(
                 {
                     relations: options.relations,
                 },
@@ -59,7 +59,7 @@ export function TreeBaseService<T extends TreeBaseModel>(
         }
 
         async getAncestors(params: object, id?: any): Promise<T[]> {
-            const element = await super.getOne(params, id);
+            const element = await super.getById(params, id);
             return await this.treeRepository.findAncestors(
                 element,
                 this.parseParams(params),
@@ -79,11 +79,11 @@ export function TreeBaseService<T extends TreeBaseModel>(
         //TODO generalized, this is too specific
         async update(id: number, data: any): Promise<T> {
             if (data.father_group !== undefined) {
-                const group: any = await super.getOne({}, id);
+                const group: any = await super.getById({}, id);
                 const old_father = group.father_group;
 
                 const new_father: any = data.father_group
-                    ? await super.getOne({}, data.father_group)
+                    ? await super.getById({}, data.father_group)
                     : null;
                 group.parent = new_father;
                 group.mpath = this.resolvePath(
