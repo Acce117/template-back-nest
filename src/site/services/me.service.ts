@@ -6,7 +6,7 @@ export class MeService {
     @Inject(UserService) userService: UserService;
 
     public me(id_user) {
-        return this.userService.getOne(
+        return this.userService.getById(
             id_user,
             { relations: ["roles", "permissions"] },
         );
