@@ -11,6 +11,8 @@ import { User } from "src/users/models/user.model";
 import { MailerService } from "@nestjs-modules/mailer";
 import { UserDto } from "src/users/dto/user.dto";
 import { ConfigService } from "@nestjs/config";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 
 @Injectable()
 export class SiteService {
@@ -18,6 +20,8 @@ export class SiteService {
     @Inject(UserService) private readonly userService: UserService;
     @Inject(MailerService) private readonly mailerService: MailerService;
     @Inject(ConfigService) private readonly configService: ConfigService;
+
+    constructor(@InjectQueue('mails') private readonly mailsQueue: Queue) {}
 
     public async signIn(user, manager) {
         const newUser: User = await this.userService.create(user, manager);
@@ -60,14 +64,12 @@ export class SiteService {
         const url =
             this.configService.get("FRONT_BASE_URL") + `resetPassword/${token}`;
 
-        this.mailerService.sendMail({
+        this.mailsQueue.add('reset_password', {
             to: user.email,
             subject: "Resetting password",
             from: "app_name", //Change and declare as env var
-            template: "./email/reset_password",
-            context: {
-                url,
-            },
+            template: "./site/templates/email/reset_password",
+            context: { url },
         });
     }
 
