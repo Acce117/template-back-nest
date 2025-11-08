@@ -3,7 +3,7 @@ import { ManagerContainer, TransactionHandler } from "./transactionHandler";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource, EntityManager } from "typeorm";
 
-class TypeOrmManagerContainer implements ManagerContainer<EntityManager> {
+class TypeOrmManagerContainer implements ManagerContainer {
     constructor(readonly manager: EntityManager) {}
 }
 
@@ -19,8 +19,7 @@ export class TypeOrmHandler implements TransactionHandler {
             await queryRunner.startTransaction();
 
             result = await cb(
-                // new TypeOrmManagerContainer(queryRunner.manager)
-                queryRunner.manager
+                new TypeOrmManagerContainer(queryRunner.manager)
             );
 
             await queryRunner.commitTransaction();

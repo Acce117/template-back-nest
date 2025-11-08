@@ -4,6 +4,7 @@ import { Brackets, EntityManager, Repository, SelectQueryBuilder } from "typeorm
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { BaseRepository } from "./repository";
+import { ManagerContainer } from "../handlers/transactionHandler";
 
 @Injectable()
 export class TypeOrmRepository<T> implements BaseRepository<T> {
@@ -187,12 +188,12 @@ export class TypeOrmRepository<T> implements BaseRepository<T> {
         };
     }
 
-    public async create(data, manager: EntityManager) {
+    public async create(data, manager: ManagerContainer) {
         const repository: Repository<any> = this.model.getRepository();
 
         const element = await this.createObjectAndRelations(this.model, data, repository);
 
-        return manager
+        return (manager.manager as EntityManager)
             .withRepository(this.model.getRepository())
             .save(element);
     }
@@ -267,14 +268,14 @@ export class TypeOrmRepository<T> implements BaseRepository<T> {
         if (related.length > 0) element[relation.propertyName] = related;
     }
 
-    async update(id, data, manager: EntityManager) {
+    async update(id, data, manager: ManagerContainer) {
         const entity = await this.getById(id, {});
 
         if (!entity) throw new NotFoundException();
 
         Object.assign(entity, data);
 
-        return manager
+        return (manager.manager as EntityManager)
             .withRepository<T, Repository<T>>(this.model.getRepository())
             .save(entity);
     }

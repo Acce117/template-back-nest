@@ -4,6 +4,6 @@ export interface TransactionHandler {
     handle(cb: CallableFunction): Promise<any>;
 }
 
-export interface ManagerContainer<T> {
-    readonly manager: T;
+export interface ManagerContainer {
+    readonly manager;
 }

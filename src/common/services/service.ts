@@ -3,6 +3,7 @@ import { ICrudService } from "./service.interface";
 import { EntityManager } from "typeorm";
 import { BaseModel } from "../model/baseModel";
 import { BaseRepository } from "../repositories/repository";
+import { ManagerContainer } from "../handlers/transactionHandler";
 
 export function CrudBaseService<T extends BaseModel>(): Type<ICrudService> {
     @Injectable()
@@ -24,20 +25,19 @@ export function CrudBaseService<T extends BaseModel>(): Type<ICrudService> {
             return true;
         }
 
-        async create(data, manager?: EntityManager) {
+        async create(data, manager?: ManagerContainer) {
             return this.repository.create(
-                
                 data,
                 manager
             );
         }
 
-        async update(id: any, data: any, manager?: EntityManager) {
+        async update(id: any, data: any, manager?: ManagerContainer) {
             return this.repository.update(id, data,  manager);
         }
 
-        async delete(id: any, manager?: EntityManager) {
-            return this.getById(id, {}).then((e: T) => e.delete(manager));
+        async delete(id: any, manager?: ManagerContainer) {
+            return this.getById(id, {}).then((e: T) => e.delete(manager.manager));
         }
 
         dataAmount(params) {
