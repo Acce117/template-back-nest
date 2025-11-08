@@ -3,13 +3,14 @@ import { SiteService } from "../services/site.service";
 import { JWT, JWTPayload } from "../../common/decorators/jwt.decorator";
 import { UserDto } from "src/users/dto/user.dto";
 import { BlackListService } from "../services/blacklist.service";
-import { TransactionHandlerType } from "../../common/utils/transactionHandler";
+import { TransactionHandler } from "../../common/handlers/transactionHandler";
 import { Public } from "../../common/decorators/isPublic.decorator";
+import { TypeOrmHandler } from "src/common/handlers/typeOrmHandler";
 
 @Controller()
 export class SiteController {
     @Inject() private readonly blackListService: BlackListService;
-    @Inject("transaction-handler") transactionHandler: TransactionHandlerType;
+    @Inject(TypeOrmHandler) transactionHandler: TransactionHandler;
 
     constructor(private readonly siteService: SiteService) { }
 

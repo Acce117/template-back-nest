@@ -5,7 +5,7 @@ import { UserService } from "../services/users.service";
 import { UserEntity } from "../entities/user.entity";
 
 export class UserController extends CrudBaseController({
-    prefix: "users",
+    prefix: "",
     dto: UserDto,
     entity: UserEntity,
 }) {

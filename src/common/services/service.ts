@@ -1,65 +1,39 @@
-import { Inject, Injectable, NotFoundException, Type } from "@nestjs/common";
-import { QueryFactory } from "./query-factory";
+import { Injectable, Type } from "@nestjs/common";
 import { ICrudService } from "./service.interface";
 import { EntityManager } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { BaseModel } from "../model/baseModel";
+import { BaseRepository } from "../repositories/repository";
 
-export interface ServiceOptions {
-    model: any;
-}
-
-export function CrudBaseService<T extends BaseModel>(
-    options: ServiceOptions,
-): Type<ICrudService> {
+export function CrudBaseService<T extends BaseModel>(): Type<ICrudService> {
     @Injectable()
     class CrudService implements ICrudService<T> {
-        model = options.model;
-        @Inject(QueryFactory) readonly queryFactory: QueryFactory;
+        readonly repository: BaseRepository<T>;
 
         async getAll(params) {
-            return this.queryFactory
-                .selectQuery<T>(this.model, params)
-                .getMany();
+            return this.repository.getAll( params);
         }
 
         getById(id, params?) {
-            let query = this.queryFactory.selectQuery<T>(this.model, params);
-
-            const primaryKey: ColumnMetadata[] =
-                this.model.getRepository().metadata.primaryColumns[0]
-                    .propertyName;
-
-            query = query.where(
-                `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
-                { id },
-            );
-
-            return query.getOne();
+            return this.repository.getById(id,  params)
         }
 
+        //TODO
         async exists(params) {
-            const result = await this.queryFactory.selectQuery(this.model, params);
-            return result !== null;
+            // const result = await this.repository.selectQuery( params);
+            // return result !== null;
+            return true;
         }
 
         async create(data, manager?: EntityManager) {
-            const element = await this.queryFactory.createQuery(
-                this.model,
+            return this.repository.create(
+                
                 data,
+                manager
             );
-
-            return manager
-                .withRepository(this.model.getRepository())
-                .save(element);
         }
 
         async update(id: any, data: any, manager?: EntityManager) {
-            const entity = await this.getById(id);
-
-            if (!entity) throw new NotFoundException();
-
-            return manager.update(this.model, id, data);
+            return this.repository.update(id, data,  manager);
         }
 
         async delete(id: any, manager?: EntityManager) {
@@ -67,9 +41,7 @@ export function CrudBaseService<T extends BaseModel>(
         }
 
         dataAmount(params) {
-            return this.queryFactory
-                .selectQuery<T>(this.model, params)
-                .getCount();
+            return this.repository.dataAmount( params);
         }
     }
 

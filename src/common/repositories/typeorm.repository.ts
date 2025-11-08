@@ -1,23 +1,26 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { Brackets, Repository, SelectQueryBuilder } from "typeorm";
+import { Brackets, EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { BaseRepository } from "./repository";
 
 @Injectable()
-export class QueryFactory {
-    public selectQuery<T>(model, params): SelectQueryBuilder<T> {
-        let query: SelectQueryBuilder<T> = model.createQueryBuilder(
-            model.getRepository().metadata.tableName,
+export class TypeOrmRepository<T> implements BaseRepository<T> {
+    model: any;
+
+    async getAll(params): Promise<T[]> {
+        let query: SelectQueryBuilder<T> = this.model.createQueryBuilder(
+            this.model.getRepository().metadata.tableName,
         );
 
         if (params.select) query = query.select(params.select);
 
         if (params.relations)
-            query = this.setRelations(model, params.relations, query);
+            query = this.setRelations(this.model, params.relations, query);
 
         if (params.where)
-            query = this.collectionQuery(model, params.where, query);
+            query = this.collectionQuery(this.model, params.where, query);
 
         if (params.ordered_by) query = this.orderedBy(params.ordered_by, query);
 
@@ -26,7 +29,29 @@ export class QueryFactory {
             if (params.offset) query = query.offset(params.offset);
         }
 
-        return query;
+        return query.getMany();
+    }
+
+    async getById(id, params): Promise<T> {
+        let query: SelectQueryBuilder<T> = this.model.createQueryBuilder(
+            this.model.getRepository().metadata.tableName,
+        );
+
+        if (params.select) query = query.select(params.select);
+
+        if (params.relations)
+            query = this.setRelations(this.model, params.relations, query);
+
+        const primaryKey: ColumnMetadata[] =
+            this.model.getRepository().metadata.primaryColumns[0]
+                .propertyName;
+
+        query = query.where(
+            `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
+            { id },
+        );
+
+        return query.getOne();
     }
 
     private orderedBy(ordered_by, query: SelectQueryBuilder<any>) {
@@ -162,21 +187,25 @@ export class QueryFactory {
         };
     }
 
-    public async createQuery(model, data) {
-        const repository: Repository<any> = model.getRepository();
+    public async create(data, manager: EntityManager) {
+        const repository: Repository<any> = this.model.getRepository();
 
-        return this.createObjectAndRelations(model, data, repository);
+        const element = await this.createObjectAndRelations(this.model, data, repository);
+
+        return manager
+            .withRepository(this.model.getRepository())
+            .save(element);
     }
 
-    public async createObjectAndRelations(
+    private async createObjectAndRelations(
         model,
         data,
         repository: Repository<any> | null = null,
-    ) {
+    ): Promise<T | T[]> {
         if (!repository) repository = model.getRepository();
         const relations: RelationMetadata[] = repository.metadata.relations;
 
-        const element = plainToInstance(model, data, {
+        const element: T | T[] = plainToInstance<T, any>(model, data, {
             ignoreDecorators: true,
         });
 
@@ -236,5 +265,29 @@ export class QueryFactory {
         );
 
         if (related.length > 0) element[relation.propertyName] = related;
+    }
+
+    async update(id, data, manager: EntityManager) {
+        const entity = await this.getById(id, {});
+
+        if (!entity) throw new NotFoundException();
+
+        Object.assign(entity, data);
+
+        return manager
+            .withRepository<T, Repository<T>>(this.model.getRepository())
+            .save(entity);
+    }
+
+    dataAmount(params) {
+        let query: SelectQueryBuilder<T> = this.model.createQueryBuilder(
+            this.model.getRepository().metadata.tableName,
+        );
+
+        if (params.where)
+            query = this.collectionQuery(this.model, params.where, query);
+
+        return query
+            .getCount();
     }
 }

@@ -1,8 +1,10 @@
+import { BaseRepository } from "../repositories/repository";
+
 export interface ICrudService<T = any> {
-    model: any;
+    repository: BaseRepository<any>;
     getAll(params): Promise<T[]>;
     getById(id, params?): Promise<T>;
-    exists(whereConditions);
+    exists(params);
     create(data: T | T[], manager?): Promise<T>;
     update(id, data: Partial<T>, manager?);
     delete(id, manager?);

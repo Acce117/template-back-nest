@@ -12,8 +12,9 @@ import {
 } from "@nestjs/common";
 import { ICrudService } from "../services/service.interface";
 import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
-import { TransactionHandlerType } from "../utils/transactionHandler";
 import { plainToInstance } from "class-transformer";
+import { TransactionHandler } from "../handlers/transactionHandler";
+import { TypeOrmHandler } from "../handlers/typeOrmHandler";
 
 interface EndPointOptions {
     decorators?: Array<MethodDecorator>;
@@ -47,8 +48,8 @@ export function CrudBaseController(
     @Controller(options.prefix)
     class CrudController {
         service: ICrudService;
-        @Inject("transaction-handler")
-        transactionHandler: TransactionHandlerType;
+        @Inject(TypeOrmHandler)
+        transactionHandler: TransactionHandler;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
         async getAll(@Query() params): Promise<any> {

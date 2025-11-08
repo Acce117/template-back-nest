@@ -1,18 +1,12 @@
 import { Global, Module } from "@nestjs/common";
-import { QueryFactory } from "./services/query-factory";
 import { FSFileHandler } from "./services/file-handler";
-import { TransactionHandler } from "./utils/transactionHandler";
-
+import { TypeOrmHandler } from "./handlers/typeOrmHandler";
 @Module({
     providers: [
-        QueryFactory,
         FSFileHandler,
-        {
-            useClass: TransactionHandler,
-            provide: "transaction-handler",
-        },
+        TypeOrmHandler,
     ],
-    exports: [QueryFactory, FSFileHandler, "transaction-handler"],
+    exports: [ FSFileHandler, TypeOrmHandler],
 })
 @Global()
 export class CommonModule {}

@@ -7,10 +7,11 @@ import { Role } from "./models/role.model";
 import { Permission } from "./models/permission.model";
 import { UserSubscriber } from "./models/user.subscriber";
 import { ConfigModule } from "@nestjs/config";
+import { UserRepository } from "./repositories/user.repository";
 
 @Module({
     controllers: [UserController],
-    providers: [UserService, UserSubscriber],
+    providers: [UserService, UserSubscriber, UserRepository],
     exports: [UserService],
     imports: [TypeOrmModule.forFeature([User, Role, Permission]), ConfigModule],
 })
