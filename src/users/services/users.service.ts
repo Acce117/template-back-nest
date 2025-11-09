@@ -4,6 +4,6 @@ import { User } from "../models/user.model";
 import { UserRepository } from "../repositories/user.repository";
 import { BaseRepository } from "src/common/repositories/repository";
 
-export class UserService extends CrudBaseService<User>() {
+export class UserService extends CrudBaseService<User> {
     @Inject(UserRepository) repository: BaseRepository<User>;
 }
