@@ -31,13 +31,14 @@ interface BaseControllerOptions extends EndPointOptions {
 }
 
 function controllerDecorators(endpointOptions, httpMethodDecorator) {
-    let result = [];
-    if (endpointOptions !== false) {
-        result = endpointOptions
-            ? endpointOptions.push(httpMethodDecorator)
-            : [httpMethodDecorator];
-    }
+        let result = [];
 
+    if (endpointOptions !== false) 
+        result.push(
+            ...(endpointOptions?.decorators ?? []), 
+            httpMethodDecorator
+        );
+    
     return result;
 }
 

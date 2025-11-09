@@ -4,7 +4,6 @@ import { CommonModule } from "./common/common.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import databaseConfig from "./config/database.config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { StreamerModule } from "./fileStreamer/streamer.module";
 import { UsersModule } from "./users/users.module";
 import { RouterModule } from "@nestjs/core";
 import { routes } from "./routes/routes";
@@ -46,10 +45,6 @@ import bullmqConfig from "./config/bullMQ.config";
         SiteModule,
         UsersModule,
         CommonModule,
-        StreamerModule.register({
-            location: "local",
-            base_path: "/uploads",
-        }),
         RouterModule.register(routes),
         SendMailModule,
     ],

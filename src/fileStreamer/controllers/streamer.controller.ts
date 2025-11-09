@@ -1,9 +1,10 @@
 import { Controller, Get, Inject, Query, StreamableFile } from "@nestjs/common";
-import { FileStreamerService } from "../services/FileStreamer.service";
+import { FileStorageService } from "../services/fileStorage.service";
+import { FSFileStorageService } from "../services/fsFileStorage.service";
 
 @Controller("file")
 export class StreamerController {
-    @Inject("STREAMER_SERVICE") streamService: FileStreamerService;
+    @Inject(FSFileStorageService) streamService: FileStorageService;
 
     @Get()
     streamFile(@Query("path") path: string): StreamableFile {

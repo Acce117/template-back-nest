@@ -4,7 +4,7 @@ import {
     Entity,
     JoinTable,
     ManyToMany,
-    PrimaryColumn,
+    PrimaryGeneratedColumn,
 } from "typeorm";
 import { Role } from "./role.model";
 import { Permission } from "./permission.model";
@@ -13,8 +13,8 @@ import { BaseModel, softDelete } from "../../common/model/baseModel";
 @softDelete
 @Entity({ name: "users" })
 export class User extends BaseModel {
-    @PrimaryColumn({ generated: true })
-    id_user: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column()
     username: string;
@@ -25,13 +25,16 @@ export class User extends BaseModel {
     @Column()
     password: string;
 
-    @DeleteDateColumn()
-    deleted_at: Date;
+    @Column({ name: 'profile_img', nullable: true } )
+    profileImg: string;
+
+    @DeleteDateColumn({ name: 'deleted_at' })
+    deletedAt: Date;
 
     @ManyToMany(() => Role, { cascade: true })
     @JoinTable({
         name: "users_roles",
-        joinColumn: { name: "id_user", referencedColumnName: "id_user" },
+        joinColumn: { name: "id_user", referencedColumnName: "id" },
         inverseJoinColumn: { name: "id_role", referencedColumnName: "id_role" },
     })
     roles: Role[];
@@ -39,7 +42,7 @@ export class User extends BaseModel {
     @ManyToMany(() => Permission)
     @JoinTable({
         name: "users_permissions",
-        joinColumn: { name: "id_user", referencedColumnName: "id_user" },
+        joinColumn: { name: "id_user", referencedColumnName: "id" },
         inverseJoinColumn: {
             name: "id_permission",
             referencedColumnName: "id_permission",

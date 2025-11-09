@@ -45,7 +45,7 @@ export class SiteController {
     @Post("/reset-password")
     resetPassword(@Body() body, @JWTPayload() payload, @JWT() jwt) {
         this.transactionHandler.handle(async (manager) => {
-            await this.siteService.resetPassword(payload.id_user, body.password, manager);
+            await this.siteService.resetPassword(payload.id, body.password, manager);
             return this.blackListService.blackListJwt({ token: jwt });
         });
     }

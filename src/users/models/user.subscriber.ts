@@ -11,7 +11,7 @@ import { Inject } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 @EventSubscriber()
-export class UserSubscriber implements EntitySubscriberInterface {
+export class UserSubscriber implements EntitySubscriberInterface<User> {
     @Inject(ConfigService) private readonly configService: ConfigService;
 
     constructor(dataSource: DataSource) {
@@ -30,11 +30,11 @@ export class UserSubscriber implements EntitySubscriberInterface {
         return data;
     }
 
-    beforeInsert(event: InsertEvent<any>): Promise<any> | void {
+    beforeInsert(event: InsertEvent<User>): Promise<User> | void {
         event.entity = this.hashPassword(event.entity);
     }
 
-    beforeUpdate(event: UpdateEvent<any>): Promise<any> | void {
+    beforeUpdate(event: UpdateEvent<User>): Promise<User> | void {
         const password_edited = event.updatedColumns.find(
             (c) => c.propertyName === "password",
         );

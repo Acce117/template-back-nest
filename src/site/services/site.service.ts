@@ -27,7 +27,7 @@ export class SiteService {
         const newUser: User = await this.userService.create(user, manager);
 
         return {
-            token: this.jwtService.sign({ id_user: newUser.id_user }),
+            token: this.jwtService.sign({ id: newUser.id }),
         };
     }
 
@@ -45,7 +45,7 @@ export class SiteService {
             throw new UnauthorizedException("wrong credentials");
 
         return {
-            token: this.jwtService.sign({ id_user: user.id_user }),
+            token: this.jwtService.sign({ id: user.id }),
         };
     }
 
@@ -57,7 +57,7 @@ export class SiteService {
         if (!user) throw new BadRequestException();
 
         const token = this.jwtService.sign(
-            { id_user: user.id_user },
+            { id: user.id },
             { expiresIn: "1h" },
         );
 
@@ -73,7 +73,7 @@ export class SiteService {
         });
     }
 
-    public async resetPassword(id_user, password, manager) {
-        return await this.userService.update(id_user, { password }, manager);
+    public async resetPassword(userId, password, manager) {
+        return await this.userService.update(userId, { password }, manager);
     }
 }
