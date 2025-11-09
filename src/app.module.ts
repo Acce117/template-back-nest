@@ -22,25 +22,21 @@ import bullmqConfig from "./config/bullMQ.config";
 @Module({
     imports: [
         //config modules
-        ConfigModule.forRoot(),
+        ConfigModule.forRoot({ isGlobal: true }),
         CacheModule.register(cacheConfig),
         ThrottlerModule.forRootAsync({
-            imports: [ConfigModule],
             useFactory: throttlerConfig,
             inject: [ConfigService],
         }),
         MailerModule.forRootAsync({
-            imports: [ConfigModule],
             useFactory: mailerConfig,
             inject: [ConfigService],
         }),
         TypeOrmModule.forRootAsync({
-            imports: [ConfigModule],
             useFactory: databaseConfig,
             inject: [ConfigService],
         }),
         BullModule.forRootAsync({
-            imports: [ConfigModule],
             useFactory: bullmqConfig,
             inject: [ConfigService],
         }),

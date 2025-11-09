@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { SiteController } from "./controllers/site.controller";
 import { SiteService } from "./services/site.service";
 import { JwtModule } from "@nestjs/jwt";
@@ -29,11 +29,9 @@ import { SendMailModule } from "src/mailer/sendMail.module";
         },
     ],
     imports: [
-        ConfigModule,
         UsersModule,
         SendMailModule,
         JwtModule.registerAsync({
-            imports: [ConfigModule],
             useFactory: jwtConfig,
             inject: [ConfigService],
         }),
