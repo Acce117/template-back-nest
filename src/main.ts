@@ -1,10 +1,10 @@
 import { ValidationPipe } from "@nestjs/common";
-import { NestFactory } from "@nestjs/core";
+import { HttpAdapterHost, NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
-import { ToPlainInterceptor } from "./common/interceptors/toPlain.interceptor";
 import { CustomSwaggerModule } from "../../my-swagger-server";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { ErrorFilter } from "./common/filters/exception.filter";
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -19,7 +19,8 @@ async function bootstrap() {
         }),
     );
 
-    app.useGlobalInterceptors(new ToPlainInterceptor());
+    const httpAdapter = app.get(HttpAdapterHost);
+    app.useGlobalFilters(new ErrorFilter(httpAdapter));
 
     const config = new DocumentBuilder()
         // .setTitle("Cats example")
