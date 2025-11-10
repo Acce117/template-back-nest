@@ -8,7 +8,6 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { UserService } from "src/users/services/users.service";
 import { User } from "src/users/models/user.model";
-import { MailerService } from "@nestjs-modules/mailer";
 import { UserDto } from "src/users/dto/user.dto";
 import { ConfigService } from "@nestjs/config";
 import { InjectQueue } from "@nestjs/bullmq";
@@ -18,7 +17,6 @@ import { Queue } from "bullmq";
 export class SiteService {
     @Inject(JwtService) private readonly jwtService: JwtService;
     @Inject(UserService) private readonly userService: UserService;
-    @Inject(MailerService) private readonly mailerService: MailerService;
     @Inject(ConfigService) private readonly configService: ConfigService;
 
     constructor(@InjectQueue('mails') private readonly mailsQueue: Queue) {}
