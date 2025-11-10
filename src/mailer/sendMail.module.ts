@@ -1,12 +1,37 @@
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { MailConsumer } from "./services/mail.consumer";
-import { MailerModule } from "@nestjs-modules/mailer";
+import { MailerService } from "./services/mailer.service";
+import * as nodemailer from "nodemailer";
+import { ConfigService } from "@nestjs/config";
 
 @Module({
-    providers: [MailConsumer],
+    providers: [
+        MailConsumer,
+        MailerService,
+        {
+            provide: 'TRANSPORTER',
+            useFactory: (configService: ConfigService) => {
+                return nodemailer.createTransport(
+                    {
+                        host: configService.get('MAILER_HOST'),
+                        auth: {
+                            user: configService.get('MAILER_USER'),
+                            pass: configService.get('MAILER_PASSWORD'),
+                        },
+                    },
+                    {
+                        from: {
+                            name: 'No-reply',
+                            address: configService.get('MAILER_FROM'),
+                        },
+                    },
+                );
+            },
+            inject: [ConfigService],
+        }
+    ],
     imports: [
-        MailerModule,
         BullModule.registerQueue({
             name: "mails",
             defaultJobOptions: {
@@ -20,4 +45,4 @@ import { MailerModule } from "@nestjs-modules/mailer";
     ],
     exports: [BullModule],
 })
-export class SendMailModule {}
+export class SendMailModule { }

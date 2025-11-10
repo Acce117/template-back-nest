@@ -7,8 +7,6 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "./users/users.module";
 import { RouterModule } from "@nestjs/core";
 import { routes } from "./routes/routes";
-import { MailerModule } from "@nestjs-modules/mailer";
-import mailerConfig from "./config/mailer.config";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { BullModule } from "@nestjs/bullmq";
 import { SendMailModule } from "./mailer/sendMail.module";
@@ -25,10 +23,6 @@ import bullmqConfig from "./config/bullMQ.config";
         CacheModule.register(cacheConfig),
         ThrottlerModule.forRootAsync({
             useFactory: throttlerConfig,
-            inject: [ConfigService],
-        }),
-        MailerModule.forRootAsync({
-            useFactory: mailerConfig,
             inject: [ConfigService],
         }),
         TypeOrmModule.forRootAsync({
