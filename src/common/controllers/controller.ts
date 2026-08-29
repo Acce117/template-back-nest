@@ -6,15 +6,16 @@ import {
     Get,
     Inject,
     Param,
+    ParseArrayPipe,
     Patch,
     Post,
     Query,
 } from "@nestjs/common";
-import { ICrudService } from "../services/service.interface.js";
-import { ValidateDtoPipe } from "../pipes/validateDto.pipe.js";
 import { plainToInstance } from "class-transformer";
-import { TransactionHandler } from "../handlers/transactionHandler.js";
-import { TypeOrmHandler } from "../handlers/typeOrmHandler.js";
+import { CriteriaDto } from "../criteria/criteria.js";
+import { ValidateDtoPipe } from "../pipes/validateDto.pipe.js";
+import { ICrudService } from "../services/service.interface.js";
+import { UnitOfWorkBuilder } from "../services/uow-builder.service.js";
 
 interface EndPointOptions {
     decorators?: Array<MethodDecorator>;
@@ -28,6 +29,7 @@ interface BaseControllerOptions extends EndPointOptions {
     create?: EndPointOptions | false;
     update?: EndPointOptions | false;
     delete?: EndPointOptions | false;
+    deleteMany?: EndPointOptions | false;
 }
 
 function controllerDecorators(endpointOptions, httpMethodDecorator) {
@@ -47,31 +49,27 @@ export function CrudBaseController(options: BaseControllerOptions) {
     @Controller(options.prefix)
     class CrudController {
         service: ICrudService;
-        @Inject(TypeOrmHandler)
-        transactionHandler: TransactionHandler;
+        @Inject(UnitOfWorkBuilder)
+        uow: UnitOfWorkBuilder;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
-        async getAll(@Query() params): Promise<any> {
-            try {
-                const result = await this.service.getAll(params);
+        async getAll(@Query() params: CriteriaDto): Promise<any> {
+            const result = await this.service.getAll(params);
 
-                const count = await this.service.dataAmount(params);
+            const count = await this.service.dataAmount(params);
 
-                const pages = Math.ceil(count / params.limit);
+            const pages = Math.ceil(count / params.limit);
 
-                return {
-                    pages,
-                    actual_page: Math.ceil(
-                        params.offset || count / params.limit,
-                    ),
-                    count,
-                    data: options.entity
-                        ? plainToInstance(options.entity, result)
-                        : result,
-                };
-            } catch (err) {
-                return err;
-            }
+            return {
+                pages,
+                actualPage: Math.ceil(count / params.limit),
+                count,
+                data: options.entity
+                    ? plainToInstance(options.entity, result, {
+                          enableCircularCheck: true,
+                      })
+                    : result,
+            };
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
@@ -87,24 +85,15 @@ export function CrudBaseController(options: BaseControllerOptions) {
             }
         }
 
-        @Get("exists")
-        exists(@Query() query) {
-            try {
-                return this.service.exists(query);
-            } catch (err) {
-                return err.message;
-            }
-        }
-
         @applyDecorators(...controllerDecorators(options.create, Post()))
         create(@Body(new ValidateDtoPipe(options.dto, "create")) body) {
-            return this.transactionHandler.handle((manager) =>
-                this.service.create(body, manager).then((result) => {
+            return this.uow.doTransactional(() => {
+                return this.service.create(body).then((result) => {
                     return options.entity
                         ? plainToInstance(options.entity, result)
                         : result;
-                }),
-            );
+                });
+            });
         }
 
         @applyDecorators(...controllerDecorators(options.update, Patch(":id")))
@@ -112,8 +101,8 @@ export function CrudBaseController(options: BaseControllerOptions) {
             @Param("id") id: number,
             @Body(new ValidateDtoPipe(options.dto, "update")) body,
         ) {
-            return this.transactionHandler.handle((manager) =>
-                this.service.update(id, body, manager).then((result) => {
+            return this.uow.doTransactional(() =>
+                this.service.update(id, body).then((result) => {
                     return options.entity
                         ? plainToInstance(options.entity, result)
                         : result;
@@ -123,13 +112,15 @@ export function CrudBaseController(options: BaseControllerOptions) {
 
         @applyDecorators(...controllerDecorators(options.delete, Delete(":id")))
         public async delete(@Param("id") id: number) {
-            return this.transactionHandler.handle((manager) =>
-                this.service.delete(id, manager).then((result) => {
-                    return options.entity
-                        ? plainToInstance(options.entity, result)
-                        : result;
-                }),
-            );
+            return this.uow.doTransactional(() => this.service.delete(id));
+        }
+
+        @applyDecorators(...controllerDecorators(options.deleteMany, Delete()))
+        public async deleteMany(
+            @Body("ids", new ParseArrayPipe({ expectedType: Number }))
+            ids: number[],
+        ) {
+            return this.uow.doTransactional(() => this.service.deleteMany(ids));
         }
     }
 
