@@ -18,7 +18,13 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:debug": "node --experimental-vm-modules --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json"
+    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json",
+    "typeorm": "node --env-file=.env --env-file-if-exists=.env node_modules/typeorm/cli.js",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:generate": "npm run build && npm run typeorm -- migration:generate -d dist/database/data-source.js",
+    "migration:run": "npm run build && npm run typeorm -- migration:run -d dist/database/data-source.js",
+    "migration:revert": "npm run build && npm run typeorm -- migration:revert -d dist/database/data-source.js",
+    "migration:show": "npm run build && npm run typeorm -- migration:show -d dist/database/data-source.js"
   },
   "dependencies": {
     "@keyv/redis": "^5.1.6",
