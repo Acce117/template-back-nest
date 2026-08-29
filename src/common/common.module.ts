@@ -1,8 +1,8 @@
 import { Global, Module } from "@nestjs/common";
-import { TypeOrmHandler } from "./handlers/typeOrmHandler";
+import { UnitOfWorkBuilder } from "./services/uow-builder.service.js";
 @Module({
-    providers: [ TypeOrmHandler ],
-    exports: [ TypeOrmHandler],
+    providers: [UnitOfWorkBuilder],
+    exports: [UnitOfWorkBuilder],
 })
 @Global()
 export class CommonModule {}

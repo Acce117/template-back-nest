@@ -6,15 +6,16 @@ import {
     Get,
     Inject,
     Param,
+    ParseArrayPipe,
     Patch,
     Post,
     Query,
 } from "@nestjs/common";
-import { ICrudService } from "../services/service.interface";
-import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
 import { plainToInstance } from "class-transformer";
-import { TransactionHandler } from "../handlers/transactionHandler";
-import { TypeOrmHandler } from "../handlers/typeOrmHandler";
+import { CriteriaDto } from "../criteria/criteria.js";
+import { ValidateDtoPipe } from "../pipes/validateDto.pipe.js";
+import { ICrudService } from "../services/service.interface.js";
+import { UnitOfWorkBuilder } from "../services/uow-builder.service.js";
 
 interface EndPointOptions {
     decorators?: Array<MethodDecorator>;
@@ -28,77 +29,71 @@ interface BaseControllerOptions extends EndPointOptions {
     create?: EndPointOptions | false;
     update?: EndPointOptions | false;
     delete?: EndPointOptions | false;
+    deleteMany?: EndPointOptions | false;
 }
 
 function controllerDecorators(endpointOptions, httpMethodDecorator) {
-        let result = [];
+    const result = [];
 
-    if (endpointOptions !== false) 
+    if (endpointOptions !== false)
         result.push(
-            ...(endpointOptions?.decorators ?? []), 
-            httpMethodDecorator
+            ...(endpointOptions?.decorators ?? []),
+            httpMethodDecorator,
         );
-    
+
     return result;
 }
 
-export function CrudBaseController(
-    options: BaseControllerOptions,
-) {
+export function CrudBaseController(options: BaseControllerOptions) {
     @applyDecorators(...(options.decorators ?? []))
     @Controller(options.prefix)
     class CrudController {
         service: ICrudService;
-        @Inject(TypeOrmHandler)
-        transactionHandler: TransactionHandler;
+        @Inject(UnitOfWorkBuilder)
+        uow: UnitOfWorkBuilder;
 
         @applyDecorators(...controllerDecorators(options.getAll, Get()))
-        async getAll(@Query() params): Promise<any> {
-            try {
-                const result = await this.service.getAll(params);
+        async getAll(@Query() params: CriteriaDto): Promise<any> {
+            const result = await this.service.getAll(params);
 
-                const count = await this.service.dataAmount(params);
+            const count = await this.service.dataAmount(params);
 
-                const pages = Math.ceil(count / params.limit);
+            const pages = Math.ceil(count / params.limit);
 
-                return {
-                    pages,
-                    actual_page: Math.ceil(params.offset || count / params.limit),
-                    count,
-                    data: options.entity ? plainToInstance(options.entity, result) : result,
-                };
-            } catch (err) {
-                return err;
-            }
+            return {
+                pages,
+                actualPage: Math.ceil(count / params.limit),
+                count,
+                data: options.entity
+                    ? plainToInstance(options.entity, result, {
+                          enableCircularCheck: true,
+                      })
+                    : result,
+            };
         }
 
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
         async getById(@Param("id") id: number, @Query() params) {
             try {
-                return this.service.getById(id, params).then(result => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
+                return this.service.getById(id, params).then((result) => {
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
                 });
             } catch (err) {
                 return err;
             }
         }
 
-        @Get("exists")
-        exists(@Query() query) {
-            try {
-                return this.service.exists(query);
-            } catch (err) {
-                return err.message;
-            }
-        }
-
         @applyDecorators(...controllerDecorators(options.create, Post()))
         create(@Body(new ValidateDtoPipe(options.dto, "create")) body) {
-            return this.transactionHandler.handle((manager) =>
-                this.service.create(body, manager).then((result) => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
-                }),
-            );
+            return this.uow.doTransactional(() => {
+                return this.service.create(body).then((result) => {
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
+                });
+            });
         }
 
         @applyDecorators(...controllerDecorators(options.update, Patch(":id")))
@@ -106,20 +101,26 @@ export function CrudBaseController(
             @Param("id") id: number,
             @Body(new ValidateDtoPipe(options.dto, "update")) body,
         ) {
-            return this.transactionHandler.handle((manager) =>
-                this.service.update(id, body, manager).then((result) => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
-                })
+            return this.uow.doTransactional(() =>
+                this.service.update(id, body).then((result) => {
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
+                }),
             );
         }
 
         @applyDecorators(...controllerDecorators(options.delete, Delete(":id")))
         public async delete(@Param("id") id: number) {
-            return this.transactionHandler.handle((manager) =>
-                this.service.delete(id, manager).then((result) => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
-                }),
-            );
+            return this.uow.doTransactional(() => this.service.delete(id));
+        }
+
+        @applyDecorators(...controllerDecorators(options.deleteMany, Delete()))
+        public async deleteMany(
+            @Body("ids", new ParseArrayPipe({ expectedType: Number }))
+            ids: number[],
+        ) {
+            return this.uow.doTransactional(() => this.service.deleteMany(ids));
         }
     }
 

@@ -1,0 +1,10 @@
+allowBuilds:
+  bcrypt: true
+  "@parcel/watcher": true
+  msgpackr-extract: true
+  unrs-resolver: true
+  '@scarf/scarf': true
+
+strictDepBuilds: true
+autoInstallPeers: true
+strictPeerDependencies: false

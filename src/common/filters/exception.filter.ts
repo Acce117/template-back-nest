@@ -1,26 +1,42 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from "@nestjs/common";
+import {
+    ArgumentsHost,
+    Catch,
+    ExceptionFilter,
+    HttpException,
+    HttpStatus,
+    Inject,
+    Logger,
+} from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 
 @Catch()
 export class ErrorFilter implements ExceptionFilter {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+    @Inject(Logger) logger: Logger;
 
-  catch(exception: unknown, host: ArgumentsHost): void {
-    const { httpAdapter } = this.httpAdapterHost;
+    constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-    const ctx = host.switchToHttp();
+    catch(exception: unknown, host: ArgumentsHost): void {
+        console.error(exception);
 
-    const httpStatus =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+        const { httpAdapter } = this.httpAdapterHost;
 
-    const responseBody = {
-      statusCode: httpStatus,
-      timestamp: new Date().toISOString(),
-      path: httpAdapter.getRequestUrl(ctx.getRequest()),
-    };
+        const ctx = host.switchToHttp();
 
-    httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
-  }
+        const httpStatus =
+            exception instanceof HttpException
+                ? exception.getStatus()
+                : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        const responseBody = {
+            statusCode: httpStatus,
+            timestamp: new Date().toISOString(),
+            path: httpAdapter.getRequestUrl(ctx.getRequest()),
+            message:
+                exception instanceof Error
+                    ? exception.message
+                    : "Internal server error",
+        };
+
+        httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
+    }
 }
