@@ -1,18 +1,18 @@
 import { Body, Controller, Inject, Post, ValidationPipe } from "@nestjs/common";
-import { SiteService } from "../services/site.service";
-import { JWT, JWTPayload } from "../../common/decorators/jwt.decorator";
-import { UserDto } from "src/users/dto/user.dto";
-import { BlackListService } from "../services/blacklist.service";
-import { TransactionHandler } from "../../common/handlers/transactionHandler";
-import { Public } from "../../common/decorators/isPublic.decorator";
-import { TypeOrmHandler } from "src/common/handlers/typeOrmHandler";
+import { SiteService } from "../services/site.service.js";
+import { JWT, JWTPayload } from "../../common/decorators/jwt.decorator.js";
+import { UserDto } from "../../users/dto/user.dto.js";
+import { BlackListService } from "../services/blacklist.service.js";
+import { TransactionHandler } from "../../common/handlers/transactionHandler.js";
+import { Public } from "../../common/decorators/isPublic.decorator.js";
+import { TypeOrmHandler } from "../../common/handlers/typeOrmHandler.js";
 
 @Controller()
 export class SiteController {
     @Inject() private readonly blackListService: BlackListService;
     @Inject(TypeOrmHandler) transactionHandler: TransactionHandler;
 
-    constructor(private readonly siteService: SiteService) { }
+    constructor(private readonly siteService: SiteService) {}
 
     @Post("/login")
     @Public()
@@ -45,7 +45,11 @@ export class SiteController {
     @Post("/reset-password")
     resetPassword(@Body() body, @JWTPayload() payload, @JWT() jwt) {
         this.transactionHandler.handle(async (manager) => {
-            await this.siteService.resetPassword(payload.id, body.password, manager);
+            await this.siteService.resetPassword(
+                payload.id,
+                body.password,
+                manager,
+            );
             return this.blackListService.blackListJwt({ token: jwt });
         });
     }

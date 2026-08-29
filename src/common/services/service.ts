@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { ICrudService } from "./service.interface";
-import { BaseModel } from "../model/baseModel";
-import { BaseRepository } from "../repositories/repository";
-import { ManagerContainer } from "../handlers/transactionHandler";
+import { ICrudService } from "./service.interface.js";
+import { BaseModel } from "../model/baseModel.js";
+import { BaseRepository } from "../repositories/repository.js";
+import { ManagerContainer } from "../handlers/transactionHandler.js";
 
 @Injectable()
 export class CrudBaseService<T extends BaseModel> implements ICrudService<T> {
@@ -13,7 +13,7 @@ export class CrudBaseService<T extends BaseModel> implements ICrudService<T> {
     }
 
     getById(id, params?) {
-        return this.repository.getById(id, params)
+        return this.repository.getById(id, params);
     }
 
     //TODO
@@ -23,10 +23,7 @@ export class CrudBaseService<T extends BaseModel> implements ICrudService<T> {
     }
 
     async create(data, manager?: ManagerContainer) {
-        return this.repository.create(
-            data,
-            manager
-        );
+        return this.repository.create(data, manager);
     }
 
     async update(id: any, data: any, manager?: ManagerContainer) {

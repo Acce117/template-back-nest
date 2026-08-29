@@ -1,6 +1,6 @@
 import { BaseEntity, EntityManager, Repository } from "typeorm";
 
-function softDeleteExecutor(manager: EntityManager) {
+function softDeleteExecutor(this: BaseModel, manager: EntityManager) {
     return this.prepareDelete(manager).softDelete().execute();
 }
 
@@ -9,7 +9,7 @@ export function softDelete(constructor: typeof BaseModel) {
 }
 
 export class BaseModel extends BaseEntity {
-    private prepareDelete(manager: EntityManager) {
+    prepareDelete(manager: EntityManager) {
         const repository: Repository<any> =
             Object.getPrototypeOf(this).constructor.getRepository();
 

@@ -1,5 +1,4 @@
-import { EntityManager } from "typeorm";
-import { ManagerContainer } from "../handlers/transactionHandler";
+import { ManagerContainer } from "../handlers/transactionHandler.js";
 
 export interface BaseRepository<T> {
     getAll(params): Promise<T[]>;

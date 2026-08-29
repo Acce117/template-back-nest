@@ -1,4 +1,4 @@
-import { BaseModel } from "../../common/model/baseModel";
+import { BaseModel } from "../../common/model/baseModel.js";
 import { Column, DeleteDateColumn, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()

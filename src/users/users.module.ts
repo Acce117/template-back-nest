@@ -1,12 +1,12 @@
 import { Module } from "@nestjs/common";
-import { UserController } from "./controllers/users.controller";
-import { UserService } from "./services/users.service";
+import { UserController } from "./controllers/users.controller.js";
+import { UserService } from "./services/users.service.js";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./models/user.model";
-import { Role } from "./models/role.model";
-import { Permission } from "./models/permission.model";
-import { UserSubscriber } from "./models/user.subscriber";
-import { UserRepository } from "./repositories/user.repository";
+import { User } from "./models/user.model.js";
+import { Role } from "./models/role.model.js";
+import { Permission } from "./models/permission.model.js";
+import { UserSubscriber } from "./models/user.subscriber.js";
+import { UserRepository } from "./repositories/user.repository.js";
 
 @Module({
     controllers: [UserController],

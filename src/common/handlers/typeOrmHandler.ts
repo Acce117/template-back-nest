@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ManagerContainer, TransactionHandler } from "./transactionHandler";
+import { ManagerContainer, TransactionHandler } from "./transactionHandler.js";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource, EntityManager } from "typeorm";
 
@@ -18,9 +18,7 @@ export class TypeOrmHandler implements TransactionHandler {
         try {
             await queryRunner.startTransaction();
 
-            result = await cb(
-                new TypeOrmManagerContainer(queryRunner.manager)
-            );
+            result = await cb(new TypeOrmManagerContainer(queryRunner.manager));
 
             await queryRunner.commitTransaction();
         } catch (e) {
@@ -30,7 +28,6 @@ export class TypeOrmHandler implements TransactionHandler {
         } finally {
             await queryRunner.release();
         }
-
 
         return result;
     }

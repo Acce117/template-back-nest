@@ -8,8 +8,8 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
-import { IS_PUBLIC_KEY } from "../../common/decorators/isPublic.decorator";
-import { BlackListService } from "src/site/services/blacklist.service";
+import { IS_PUBLIC_KEY } from "../../common/decorators/isPublic.decorator.js";
+import { BlackListService } from "../services/blacklist.service.js";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -44,7 +44,7 @@ export class AuthGuard implements CanActivate {
                 });
 
                 result = !(await this.blackListService.isBlacklisted(jwt));
-            } catch (err) {
+            } catch {
                 throw new UnauthorizedException("Token not valid");
             }
         }

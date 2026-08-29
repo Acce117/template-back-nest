@@ -1,6 +1,6 @@
 import { Routes } from "@nestjs/core";
-import { SiteModule } from "src/site/site.module";
-import { UsersModule } from "src/users/users.module";
+import { SiteModule } from "../site/site.module.js";
+import { UsersModule } from "../users/users.module.js";
 
 export const routes: Routes = [
     {

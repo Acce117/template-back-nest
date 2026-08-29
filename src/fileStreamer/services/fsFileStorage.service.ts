@@ -1,17 +1,17 @@
 import { createReadStream, createWriteStream, existsSync, rmSync } from "fs";
 import { StreamableFile } from "@nestjs/common";
 import { join } from "path";
-import { FileStorageService } from "./fileStorage.service";
+import { FileStorageService } from "./fileStorage.service.js";
 
 export class FSFileStorageService extends FileStorageService {
-    basePath: string = './uploads/';
+    basePath: string = "./uploads/";
 
     saveFile(file: Express.Multer.File, filePath): string {
         const f = createWriteStream(filePath);
 
         try {
             f.write(file.buffer);
-        } catch (err) {
+        } catch {
             this.deleteFile(filePath);
         } finally {
             f.end();
@@ -21,12 +21,9 @@ export class FSFileStorageService extends FileStorageService {
     }
 
     streamFile(path: string): StreamableFile {
-        const file = createReadStream(
-            join(process.cwd(), this.basePath, path),
-        );
+        const file = createReadStream(join(process.cwd(), this.basePath, path));
         return new StreamableFile(file);
     }
-
 
     private deleteFile(file_path: string) {
         const result = existsSync(file_path);

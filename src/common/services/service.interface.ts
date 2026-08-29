@@ -1,4 +1,4 @@
-import { BaseRepository } from "../repositories/repository";
+import { BaseRepository } from "../repositories/repository.js";
 
 export interface ICrudService<T = any> {
     repository: BaseRepository<any>;

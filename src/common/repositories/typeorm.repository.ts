@@ -1,10 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { Brackets, EntityManager, Repository, SelectQueryBuilder } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { BaseRepository } from "./repository";
-import { ManagerContainer } from "../handlers/transactionHandler";
+import {
+    Brackets,
+    EntityManager,
+    Repository,
+    SelectQueryBuilder,
+} from "typeorm";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata.js";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata.js";
+import { BaseRepository } from "./repository.js";
+import { ManagerContainer } from "../handlers/transactionHandler.js";
 
 @Injectable()
 export class TypeOrmRepository<T> implements BaseRepository<T> {
@@ -44,8 +49,7 @@ export class TypeOrmRepository<T> implements BaseRepository<T> {
             query = this.setRelations(this.model, params.relations, query);
 
         const primaryKey: ColumnMetadata[] =
-            this.model.getRepository().metadata.primaryColumns[0]
-                .propertyName;
+            this.model.getRepository().metadata.primaryColumns[0].propertyName;
 
         query = query.where(
             `${this.model.getRepository().metadata.tableName}.${primaryKey} = :id`,
@@ -191,7 +195,11 @@ export class TypeOrmRepository<T> implements BaseRepository<T> {
     public async create(data, manager: ManagerContainer) {
         const repository: Repository<any> = this.model.getRepository();
 
-        const element = await this.createObjectAndRelations(this.model, data, repository);
+        const element = await this.createObjectAndRelations(
+            this.model,
+            data,
+            repository,
+        );
 
         return (manager.manager as EntityManager)
             .withRepository(this.model.getRepository())
@@ -288,7 +296,6 @@ export class TypeOrmRepository<T> implements BaseRepository<T> {
         if (params.where)
             query = this.collectionQuery(this.model, params.where, query);
 
-        return query
-            .getCount();
+        return query.getCount();
     }
 }

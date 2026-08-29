@@ -13,9 +13,7 @@ interface FileInBodyOptions {
 }
 
 export class FileInBodyInterceptor implements NestInterceptor {
-    constructor(
-        private fieldName: string,
-    ) {}
+    constructor(private fieldName: string) {}
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const req = context.switchToHttp().getRequest();

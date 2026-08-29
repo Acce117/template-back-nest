@@ -1,6 +1,6 @@
 import { ArgumentMetadata, PipeTransform } from "@nestjs/common";
-import { StructuralParamsOptions } from "./params_options/StructuralParamsOptions";
-import { CollectionParamsOptions } from "./params_options/CollectionParamsOptions";
+import { StructuralParamsOptions } from "./params_options/StructuralParamsOptions.js";
+import { CollectionParamsOptions } from "./params_options/CollectionParamsOptions.js";
 
 export class QueryBuilderPipe implements PipeTransform {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

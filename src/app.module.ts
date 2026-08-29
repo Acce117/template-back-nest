@@ -1,20 +1,20 @@
 import { Module } from "@nestjs/common";
-import { SiteModule } from "./site/site.module";
-import { CommonModule } from "./common/common.module";
+import { SiteModule } from "./site/site.module.js";
+import { CommonModule } from "./common/common.module.js";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import databaseConfig from "./config/database.config";
+import databaseConfig from "./config/database.config.js";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { UsersModule } from "./users/users.module";
+import { UsersModule } from "./users/users.module.js";
 import { RouterModule } from "@nestjs/core";
-import { routes } from "./routes/routes";
+import { routes } from "./routes/routes.js";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { BullModule } from "@nestjs/bullmq";
-import { SendMailModule } from "./mailer/sendMail.module";
-import { throttlerConfig } from "./config/throttler.config";
+import { SendMailModule } from "./mailer/sendMail.module.js";
+import { throttlerConfig } from "./config/throttler.config.js";
 import { JwtModule } from "@nestjs/jwt";
 import { CacheModule } from "@nestjs/cache-manager";
-import cacheConfig from "./config/cache.config";
-import bullmqConfig from "./config/bullMQ.config";
+import cacheConfig from "./config/cache.config.js";
+import bullmqConfig from "./config/bullMQ.config.js";
 
 @Module({
     imports: [
@@ -22,6 +22,7 @@ import bullmqConfig from "./config/bullMQ.config";
         ConfigModule.forRoot({ isGlobal: true }),
         CacheModule.register(cacheConfig),
         ThrottlerModule.forRootAsync({
+            imports: [],
             useFactory: throttlerConfig,
             inject: [ConfigService],
         }),

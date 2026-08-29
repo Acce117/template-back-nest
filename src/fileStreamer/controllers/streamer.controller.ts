@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Query, StreamableFile } from "@nestjs/common";
-import { FileStorageService } from "../services/fileStorage.service";
-import { FSFileStorageService } from "../services/fsFileStorage.service";
+import { FileStorageService } from "../services/fileStorage.service.js";
+import { FSFileStorageService } from "../services/fsFileStorage.service.js";
 
 @Controller("file")
 export class StreamerController {

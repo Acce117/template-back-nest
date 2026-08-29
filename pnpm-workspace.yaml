@@ -1,0 +1,9 @@
+allowBuilds:
+  bcrypt: true
+  "@parcel/watcher": true
+  msgpackr-extract: true
+  unrs-resolver: true
+
+strictDepBuilds: true
+autoInstallPeers: true
+strictPeerDependencies: false

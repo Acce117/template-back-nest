@@ -1,14 +1,12 @@
 import { ValidationPipe } from "@nestjs/common";
 import { HttpAdapterHost, NestFactory } from "@nestjs/core";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { AppModule } from "./app.module";
-import { CustomSwaggerModule } from "../../my-swagger-server";
+import { AppModule } from "./app.module.js";
 import { NestExpressApplication } from "@nestjs/platform-express";
-import { ErrorFilter } from "./common/filters/exception.filter";
+import { ErrorFilter } from "./common/filters/exception.filter.js";
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
-    app.set('query parser', 'extended');
+    app.set("query parser", "extended");
 
     app.enableCors(/** configure as you require */);
 
@@ -21,16 +19,6 @@ async function bootstrap() {
 
     const httpAdapter = app.get(HttpAdapterHost);
     app.useGlobalFilters(new ErrorFilter(httpAdapter));
-
-    const config = new DocumentBuilder()
-        // .setTitle("Cats example")
-        // .setDescription("The cats API description")
-        // .setVersion("1.0")
-        // .addTag("cats")
-        .build();
-
-    const documentFactory = () => SwaggerModule.createDocument(app, config);
-    CustomSwaggerModule.setup("api", app, documentFactory());
 
     await app.listen(parseInt(process.env.DOMAIN));
 }

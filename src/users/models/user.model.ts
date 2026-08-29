@@ -6,9 +6,9 @@ import {
     ManyToMany,
     PrimaryGeneratedColumn,
 } from "typeorm";
-import { Role } from "./role.model";
-import { Permission } from "./permission.model";
-import { BaseModel, softDelete } from "../../common/model/baseModel";
+import { Role } from "./role.model.js";
+import { Permission } from "./permission.model.js";
+import { BaseModel, softDelete } from "../../common/model/baseModel.js";
 
 @softDelete
 @Entity({ name: "users" })
@@ -25,10 +25,10 @@ export class User extends BaseModel {
     @Column()
     password: string;
 
-    @Column({ name: 'profile_img', nullable: true } )
+    @Column({ name: "profile_img", nullable: true })
     profileImg: string;
 
-    @DeleteDateColumn({ name: 'deleted_at' })
+    @DeleteDateColumn({ name: "deleted_at" })
     deletedAt: Date;
 
     @ManyToMany(() => Role, { cascade: true })

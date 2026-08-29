@@ -1,4 +1,4 @@
-import { StructuralParamsOptions } from "./StructuralParamsOptions";
+import { StructuralParamsOptions } from "./StructuralParamsOptions.js";
 
 export class CollectionParamsOptions extends StructuralParamsOptions {
     where?: object;

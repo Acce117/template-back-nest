@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
-import path from "path";
 import * as fs from "fs";
-import { Data, render, renderFile } from "ejs";
-import { ISendMailOptions } from "../types/sendMailOptions";
+// import { Data, render } from "ejs";
+import ejs from "ejs";
+import type { Data } from "ejs";
+import { ISendMailOptions } from "../types/sendMailOptions.js";
 import { ConfigService } from "@nestjs/config";
 
 @Injectable()
@@ -16,8 +17,8 @@ export class MailerService {
         // const templatesFolderPath = path.join(__dirname, './templates');
         // const templatePath = path.join(templatesFolderPath, template);
 
-        const templateSource = fs.readFileSync(template, 'utf8');
-        return render(templateSource, data);
+        const templateSource = fs.readFileSync(template, "utf8");
+        return ejs.render(templateSource, data);
     }
 
     async sendMail(options: ISendMailOptions) {

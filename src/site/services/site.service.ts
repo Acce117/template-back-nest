@@ -6,9 +6,9 @@ import {
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
-import { UserService } from "src/users/services/users.service";
-import { User } from "src/users/models/user.model";
-import { UserDto } from "src/users/dto/user.dto";
+import { UserService } from "../../users/services/users.service.js";
+import { User } from "../../users/models/user.model.js";
+import { UserDto } from "../../users/dto/user.dto.js";
 import { ConfigService } from "@nestjs/config";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
@@ -19,7 +19,7 @@ export class SiteService {
     @Inject(UserService) private readonly userService: UserService;
     @Inject(ConfigService) private readonly configService: ConfigService;
 
-    constructor(@InjectQueue('mails') private readonly mailsQueue: Queue) {}
+    constructor(@InjectQueue("mails") private readonly mailsQueue: Queue) {}
 
     public async signIn(user, manager) {
         const newUser: User = await this.userService.create(user, manager);
@@ -62,7 +62,7 @@ export class SiteService {
         const url =
             this.configService.get("FRONT_BASE_URL") + `resetPassword/${token}`;
 
-        this.mailsQueue.add('reset_password', {
+        this.mailsQueue.add("reset_password", {
             to: user.email,
             subject: "Resetting password",
             from: "app_name", //Change and declare as env var

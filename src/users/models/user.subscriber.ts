@@ -5,7 +5,7 @@ import {
     InsertEvent,
     UpdateEvent,
 } from "typeorm";
-import { User } from "./user.model";
+import { User } from "./user.model.js";
 import * as bcrypt from "bcrypt";
 import { Inject } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";

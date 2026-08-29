@@ -1,5 +1,9 @@
-import { createParamDecorator, ExecutionContext, UnauthorizedException } from "@nestjs/common";
-import { decode, verify } from "jsonwebtoken";
+import {
+    createParamDecorator,
+    ExecutionContext,
+    UnauthorizedException,
+} from "@nestjs/common";
+import { decode } from "jsonwebtoken";
 
 export function getJwt(ctx: ExecutionContext) {
     const request = ctx.switchToHttp().getRequest();
@@ -24,15 +28,17 @@ export const JWT = createParamDecorator((data, ctx) => {
     }
 });
 
-export const JWTPayload = createParamDecorator((attributeToExtract: string, ctx) => {
-    let result;
-    try {
-        const payload = getJwtPayload(ctx);
-        if(attributeToExtract) result = payload[attributeToExtract];
-        else result = payload;
-        
-        return result;
-    }catch (err) {
-        throw new UnauthorizedException(err);
-    }
-});
+export const JWTPayload = createParamDecorator(
+    (attributeToExtract: string, ctx) => {
+        let result;
+        try {
+            const payload = getJwtPayload(ctx);
+            if (attributeToExtract) result = payload[attributeToExtract];
+            else result = payload;
+
+            return result;
+        } catch (err) {
+            throw new UnauthorizedException(err);
+        }
+    },
+);

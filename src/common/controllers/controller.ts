@@ -10,11 +10,11 @@ import {
     Post,
     Query,
 } from "@nestjs/common";
-import { ICrudService } from "../services/service.interface";
-import { ValidateDtoPipe } from "../pipes/validateDto.pipe";
+import { ICrudService } from "../services/service.interface.js";
+import { ValidateDtoPipe } from "../pipes/validateDto.pipe.js";
 import { plainToInstance } from "class-transformer";
-import { TransactionHandler } from "../handlers/transactionHandler";
-import { TypeOrmHandler } from "../handlers/typeOrmHandler";
+import { TransactionHandler } from "../handlers/transactionHandler.js";
+import { TypeOrmHandler } from "../handlers/typeOrmHandler.js";
 
 interface EndPointOptions {
     decorators?: Array<MethodDecorator>;
@@ -31,20 +31,18 @@ interface BaseControllerOptions extends EndPointOptions {
 }
 
 function controllerDecorators(endpointOptions, httpMethodDecorator) {
-        let result = [];
+    const result = [];
 
-    if (endpointOptions !== false) 
+    if (endpointOptions !== false)
         result.push(
-            ...(endpointOptions?.decorators ?? []), 
-            httpMethodDecorator
+            ...(endpointOptions?.decorators ?? []),
+            httpMethodDecorator,
         );
-    
+
     return result;
 }
 
-export function CrudBaseController(
-    options: BaseControllerOptions,
-) {
+export function CrudBaseController(options: BaseControllerOptions) {
     @applyDecorators(...(options.decorators ?? []))
     @Controller(options.prefix)
     class CrudController {
@@ -63,9 +61,13 @@ export function CrudBaseController(
 
                 return {
                     pages,
-                    actual_page: Math.ceil(params.offset || count / params.limit),
+                    actual_page: Math.ceil(
+                        params.offset || count / params.limit,
+                    ),
                     count,
-                    data: options.entity ? plainToInstance(options.entity, result) : result,
+                    data: options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result,
                 };
             } catch (err) {
                 return err;
@@ -75,8 +77,10 @@ export function CrudBaseController(
         @applyDecorators(...controllerDecorators(options.getOne, Get(":id")))
         async getById(@Param("id") id: number, @Query() params) {
             try {
-                return this.service.getById(id, params).then(result => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
+                return this.service.getById(id, params).then((result) => {
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
                 });
             } catch (err) {
                 return err;
@@ -96,7 +100,9 @@ export function CrudBaseController(
         create(@Body(new ValidateDtoPipe(options.dto, "create")) body) {
             return this.transactionHandler.handle((manager) =>
                 this.service.create(body, manager).then((result) => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
                 }),
             );
         }
@@ -108,8 +114,10 @@ export function CrudBaseController(
         ) {
             return this.transactionHandler.handle((manager) =>
                 this.service.update(id, body, manager).then((result) => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
-                })
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
+                }),
             );
         }
 
@@ -117,7 +125,9 @@ export function CrudBaseController(
         public async delete(@Param("id") id: number) {
             return this.transactionHandler.handle((manager) =>
                 this.service.delete(id, manager).then((result) => {
-                    return options.entity ? plainToInstance(options.entity, result) : result
+                    return options.entity
+                        ? plainToInstance(options.entity, result)
+                        : result;
                 }),
             );
         }

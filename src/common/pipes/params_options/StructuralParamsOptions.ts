@@ -1,4 +1,4 @@
-import { CollectionParamsOptions } from './CollectionParamsOptions';
+import { CollectionParamsOptions } from "./CollectionParamsOptions.js";
 
 export class StructuralParamsOptions {
     name?: string;
