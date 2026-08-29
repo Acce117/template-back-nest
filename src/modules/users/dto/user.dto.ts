@@ -10,7 +10,7 @@ export class UserDto {
     @IsEmail(
         {},
         {
-            groups: ["create", "update", "sign-in"],
+            groups: ["create", "update", "login", "sign-in"],
         },
     )
     @IsOptional({ groups: ["update"] })

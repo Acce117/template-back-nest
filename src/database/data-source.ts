@@ -1,8 +1,8 @@
 import { join } from "path";
 import { DataSource } from "typeorm";
-import { User } from "../users/models/user.model.js";
-import { Role } from "../users/models/role.model.js";
-import { Permission } from "../users/models/permission.model.js";
+import { User } from "../modules/users/models/user.model.js";
+import { Role } from "../modules/users/models/role.model.js";
+import { Permission } from "../modules/users/models/permission.model.js";
 
 export default new DataSource({
     type: "postgres",

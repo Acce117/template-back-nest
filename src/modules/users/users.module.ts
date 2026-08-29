@@ -11,7 +11,7 @@ import { UserRepository } from "./repositories/user.repository.js";
 @Module({
     controllers: [UserController],
     providers: [UserService, UserSubscriber, UserRepository],
-    exports: [UserService],
+    exports: [UserService, TypeOrmModule],
     imports: [TypeOrmModule.forFeature([User, Role, Permission])],
 })
 export class UsersModule {}

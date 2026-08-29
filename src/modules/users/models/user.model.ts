@@ -1,5 +1,6 @@
 import {
     Column,
+    CreateDateColumn,
     DeleteDateColumn,
     Entity,
     JoinTable,
@@ -8,7 +9,7 @@ import {
 } from "typeorm";
 import { Role } from "./role.model.js";
 import { Permission } from "./permission.model.js";
-import { BaseModel, softDelete } from "../../common/model/baseModel.js";
+import { BaseModel, softDelete } from "../../../common/model/baseModel.js";
 
 @softDelete
 @Entity({ name: "users" })
@@ -30,6 +31,21 @@ export class User extends BaseModel {
 
     @DeleteDateColumn({ name: "deleted_at" })
     deletedAt: Date;
+
+    @CreateDateColumn({ name: "created_at" })
+    createdAt: Date;
+
+    @Column({ name: "is_verified", default: false })
+    isVerified: boolean;
+
+    @Column({ name: "verification_code", nullable: true })
+    verificationCode: string;
+
+    @Column({
+        name: "verification_code_expires_at",
+        nullable: true,
+    })
+    verificationCodeExpiresAt: Date;
 
     @ManyToMany(() => Role, { cascade: true })
     @JoinTable({
