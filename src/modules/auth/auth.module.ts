@@ -1,24 +1,27 @@
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { SiteController } from "./controllers/site.controller.js";
-import { SiteService } from "./services/site.service.js";
-import { JwtModule } from "@nestjs/jwt";
-import jwtConfig from "../config/jwt.config.js";
-import { UsersModule } from "../users/users.module.js";
-import { BlackListService } from "./services/blacklist.service.js";
 import { APP_GUARD } from "@nestjs/core";
+import { JwtModule } from "@nestjs/jwt";
 import { ThrottlerGuard } from "@nestjs/throttler";
-import { AuthGuard } from "./guards/auth.guard.js";
+import jwtConfig from "../../config/jwt.config.js";
+import { SendMailModule } from "../../mailer/sendMail.module.js";
+import { UsersModule } from "../users/users.module.js";
+import { AuthController } from "./controllers/auth.controller.js";
 import { MeController } from "./controllers/me.controller.js";
+import { AuthGuard } from "./guards/auth.guard.js";
+import { AuthService } from "./services/auth.service.js";
+import { CleanupService } from "./services/cleanup.service.js";
 import { MeService } from "./services/me.service.js";
-import { SendMailModule } from "../mailer/sendMail.module.js";
+import { BlackListService } from "./services/blacklist.service.js";
 
 @Module({
-    controllers: [SiteController, MeController],
+    controllers: [AuthController, MeController],
     providers: [
-        SiteService,
-        BlackListService,
+        AuthService,
+        CleanupService,
         MeService,
+        AuthGuard,
+        BlackListService,
         {
             provide: APP_GUARD,
             useClass: ThrottlerGuard,
@@ -36,6 +39,5 @@ import { SendMailModule } from "../mailer/sendMail.module.js";
             inject: [ConfigService],
         }),
     ],
-    exports: [BlackListService],
 })
-export class SiteModule {}
+export class AuthModule {}

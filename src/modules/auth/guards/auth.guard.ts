@@ -1,26 +1,26 @@
 import {
     CanActivate,
     ExecutionContext,
-    Inject,
     Injectable,
     UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
-import { IS_PUBLIC_KEY } from "../../common/decorators/isPublic.decorator.js";
+import {
+    COOKIE_NAME,
+    IS_PUBLIC_KEY,
+} from "../../../common/decorators/isPublic.decorator.js";
+import { AUTH_COOKIE_NAME } from "../../../common/cookies/cookie.helper.js";
 import { BlackListService } from "../services/blacklist.service.js";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    @Inject(BlackListService)
-    private readonly blackListService: BlackListService;
-
-    @Inject(ConfigService) configService: ConfigService;
-
     constructor(
         private readonly jwtService: JwtService,
         private readonly reflector: Reflector,
+        private readonly configService: ConfigService,
+        private readonly blackListService: BlackListService,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -29,21 +29,25 @@ export class AuthGuard implements CanActivate {
             context.getClass(),
         ]);
 
+        const cookieTokenToVerify = this.reflector.getAllAndOverride<string>(
+            COOKIE_NAME,
+            [context.getHandler()],
+        );
+
         if (!result) {
             const req = context.switchToHttp().getRequest();
-            const authorization = req.get("Authorization");
 
-            if (!authorization)
-                throw new UnauthorizedException("not provided token");
+            const token =
+                req.cookies?.[cookieTokenToVerify || AUTH_COOKIE_NAME];
+
+            if (!token) throw new UnauthorizedException("not provided token");
 
             try {
-                const jwt = authorization.split(" ")[1];
-
-                this.jwtService.verify(jwt, {
+                this.jwtService.verify(token, {
                     secret: this.configService.get("JWT_SECRET"),
                 });
 
-                result = !(await this.blackListService.isBlacklisted(jwt));
+                result = !(await this.blackListService.isBlacklisted(token));
             } catch {
                 throw new UnauthorizedException("Token not valid");
             }
